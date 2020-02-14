@@ -1,7 +1,7 @@
 
 class Pub:
     def __init__(self, name: str, distance, has_beer: bool=True, has_pub_quiz: bool=False,
-is_spoons:bool = False, has_live_music=False, address:str= None, coordinates=None):
+is_spoons:bool = False, has_live_music=False, address:str= None, coordinates=None, has_funny_smell=False, **kwargs):
         """
         Plain Ol' Data class for a pub.
         :param name: The name of the pub (although in a dict we may end up storing this twice)
@@ -17,6 +17,12 @@ is_spoons:bool = False, has_live_music=False, address:str= None, coordinates=Non
         self.has_live_music = has_live_music
         self.address = address
         self.coordinates=coordinates
+        self.has_funny_smell = has_funny_smell
+        for key, val in kwargs.items():
+            __setattr__(self, key, val)
+
+    def __getattr__(self, attr):
+        return None
 
 
 PUBS = [Pub("The Bear Inn", 1.1, address="The Bear, 6, Alfred Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4EH, United Kingdom", coordinates=(51.7515537, -1.2557349)),
@@ -24,16 +30,15 @@ PUBS = [Pub("The Bear Inn", 1.1, address="The Bear, 6, Alfred Street, Grandpont,
         Pub("The Chequers", 1.0, "The Chequers, 131, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4DH, United Kingdom", coordinates=(51.759109, -1.1974538)),
 	Pub("The Crown", 1.1, address="The Crown, 59a, Cornmarket Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 3HB, United Kingdom", coordinates= (51.7521883, -1.2580222)),
 	Pub("The Eagle and Child", 0.65, "Eagle and Child, 49, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3LU, United Kingdom",
-coordinates= (51.757221099999995, -1.2603284108858848)),
+coordinates= (51.757221099999995, -1.2603284108858848), has_funny_smell=True),
         Pub("The Four Candles", 1.1, is_spoons=True, address="The Four Candles, 51-53, George Street, Jericho, Oxford, Oxfordshire, South East, England, OX1 2BE, United Kingdom",
 coordinates= (51.7533993, -1.2620909)),
         Pub("The Grapes", 1.0, address="The Grapes, 7, George Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2AT, United Kingdom", coordinates= (51.7537486, -1.2595821)),
         Pub("The Head of the River", 1.7, address="The Head of the River, 1, Folly Bridge, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4LB, United Kingdom",
 coordinates= (51.746687800000004, -1.2560323412804122)),
         Pub("The Kings Arms", 0.6, address="King's Arms, 40, Holywell Street, Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3SP, United Kingdom", coordinates=(51.7550797, -1.2543214)),
-        Pub("The Lamb and Flag", 0.55, address="Lamb and Flag, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3JS, United Kingdom", coordinates= (51.757404699999995, -1.2593104924183205)),
-        Pub("The Mitre", 1.0, address="The Mitre, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4AQ, United Kingdom",
-coordinates= (51.7523948, -1.2559797928120555)),
+        Pub("The Lamb and Flag", 0.55, address="Lamb and Flag, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3JS, United Kingdom", coordinates= (51.757404699999995, -1.2593104924183205), has_funny_smell=True),
+        #Pub("The Mitre", 1.0, address="The Mitre, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4AQ, United Kingdom", coordinates= (51.7523948, -1.2559797928120555)),
         Pub("The Old Tom", 1.2,address="Old Tom, 101, St Aldate\'s, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1BT, United Kingdom", coordinates=(51.7508746, -1.2572208)),
         Pub("O'Neills", 1.0, has_beer=False, address="O'Neill's, George Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2BJ, United Kingdom", coordinates=(51.7535341, -1.2607996)),
         Pub("The Oxford Retreat", 1.4,address="  The Oxford Retreat, 1-2, Hythe Bridge Street, Jericho, Oxford, Oxfordshire, South East, England, OX1 2TA, United Kingdom ",
