@@ -1,0 +1,4 @@
+*.osm
+*.gpickle
+*.pkl
+__pycache__
