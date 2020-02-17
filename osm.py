@@ -1,8 +1,11 @@
-import networkx
 import copy
-from geopy.distance import geodesic
+
 # Specific modules
-import xml.sax # parse osm file
+import xml.sax  # parse osm file
+
+import networkx as nx
+from geopy.distance import geodesic
+
 
 def read_osm(filename_or_stream, only_roads=True):
     """Read graph in OSM format from file specified by name or by stream object.
@@ -20,82 +23,84 @@ def read_osm(filename_or_stream, only_roads=True):
     >>> plt.show()
     """
     osm = OSM(filename_or_stream)
-    G = networkx.DiGraph()
+    G = nx.DiGraph()
 
     ## Add ways
     for w in osm.ways.values():
-        if only_roads and 'highway' not in w.tags:
+        if only_roads and "highway" not in w.tags:
             continue
 
-        if w.tags.get('oneway', 'no') == 'yes':
-            networkx.add_path(G, w.nds, id=w.id)
+        if w.tags.get("oneway", "no") == "yes":
+            nx.add_path(G, w.nds, id=w.id)
         else:
             # BOTH DIRECTION
-            networkx.add_path(G, w.nds, id=w.id)
-            networkx.add_path(G, w.nds[::-1], id=w.id)
+            nx.add_path(G, w.nds, id=w.id)
+            nx.add_path(G, w.nds[::-1], id=w.id)
 
     ## Complete the used nodes' information
     for n_id in G.nodes:
         n = osm.nodes[n_id]
-        G.nodes[n_id]['lat'] = n.lat
-        G.nodes[n_id]['lon'] = n.lon
-        G.nodes[n_id]['id'] = n.id
+        G.nodes[n_id]["lat"] = n.lat
+        G.nodes[n_id]["lon"] = n.lon
+        G.nodes[n_id]["id"] = n.id
 
     ## Estimate the length of each way
     for u, v in G.edges:
-        distance = geodesic((G.nodes[u]['lon'], G.nodes[u]['lat']), (G.nodes[v]['lon'], G.nodes[v]['lat'])).km # Give a realistic distance estimation (neither EPSG nor projection nor reference system are specified)
+        distance = geodesic(
+            (G.nodes[u]["lon"], G.nodes[u]["lat"]),
+            (G.nodes[v]["lon"], G.nodes[v]["lat"]),
+        ).km  # Give a realistic distance estimation (neither EPSG nor projection nor reference system are specified)
 
-        G.edges[u, v]['length'] = distance
+        G.edges[u, v]["length"] = distance
 
     # For the exercise we do not want the graph to be directed
-    return networkx.Graph(G)
+    return nx.Graph(G)
 
 
 class Node:
-    def __init__(self, id, lon, lat):
-        self.id = id
-        self.lon = lon
-        self.lat = lat
+    def __init__(self, _id, _lon, _lat):
+        self.id = _id
+        self.lon = _lon
+        self.lat = _lat
         self.tags = {}
 
     def __str__(self):
-        return "Node (id : %s) lon : %s, lat : %s "%(self.id, self.lon, self.lat)
+        return f"Node (id : {self.id}) lon : {self.lon}, lat : {self.lat} "
 
 
 class Way:
-    def __init__(self, id, osm):
-        self.osm = osm
-        self.id = id
+    def __init__(self, _id, _osm):
+        self.osm = _osm
+        self.id = _id
         self.nds = []
         self.tags = {}
 
     def split(self, dividers):
         # slice the node-array using this nifty recursive function
         def slice_array(ar, dividers):
-            for i in range(1,len(ar)-1):
-                if dividers[ar[i]]>1:
-                    left = ar[:i+1]
+            for i in range(1, len(ar) - 1):
+                if dividers[ar[i]] > 1:
+                    left = ar[: i + 1]
                     right = ar[i:]
 
                     rightsliced = slice_array(right, dividers)
 
-                    return [left]+rightsliced
+                    return [left] + rightsliced
             return [ar]
 
         slices = slice_array(self.nds, dividers)
 
         # create a way object for each node-array slice
         ret = []
-        i=0
+        i = 0
         for slice in slices:
-            littleway = copy.copy( self )
-            littleway.id += "-%d"%i
+            littleway = copy.copy(self)
+            littleway.id += "-%d" % i
             littleway.nds = slice
-            ret.append( littleway )
+            ret.append(littleway)
             i += 1
 
         return ret
-
 
 
 class OSM:
@@ -108,7 +113,7 @@ class OSM:
 
         class OSMHandler(xml.sax.ContentHandler):
             @classmethod
-            def setDocumentLocator(self,loc):
+            def setDocumentLocator(self, loc):
                 pass
 
             @classmethod
@@ -121,20 +126,22 @@ class OSM:
 
             @classmethod
             def startElement(self, name, attrs):
-                if name=='node':
-                    self.currElem = Node(attrs['id'], float(attrs['lon']), float(attrs['lat']))
-                elif name=='way':
-                    self.currElem = Way(attrs['id'], superself)
-                elif name=='tag':
-                    self.currElem.tags[attrs['k']] = attrs['v']
-                elif name=='nd':
-                    self.currElem.nds.append( attrs['ref'] )
+                if name == "node":
+                    self.currElem = Node(
+                        attrs["id"], float(attrs["lon"]), float(attrs["lat"])
+                    )
+                elif name == "way":
+                    self.currElem = Way(attrs["id"], superself)
+                elif name == "tag":
+                    self.currElem.tags[attrs["k"]] = attrs["v"]
+                elif name == "nd":
+                    self.currElem.nds.append(attrs["ref"])
 
             @classmethod
-            def endElement(self,name):
-                if name=='node':
+            def endElement(self, name):
+                if name == "node":
                     nodes[self.currElem.id] = self.currElem
-                elif name=='way':
+                elif name == "way":
                     ways[self.currElem.id] = self.currElem
 
             @classmethod
@@ -146,16 +153,18 @@ class OSM:
         self.nodes = nodes
         self.ways = ways
 
-        #count times each node is used
-        node_histogram = dict.fromkeys( self.nodes.keys(), 0 )
+        # count times each node is used
+        node_histogram = dict.fromkeys(self.nodes.keys(), 0)
         for way in list(self.ways.values()):
-            if len(way.nds) < 2:       #if a way has only one node, delete it out of the osm collection
+            if (
+                len(way.nds) < 2
+            ):  # if a way has only one node, delete it out of the osm collection
                 del self.ways[way.id]
             else:
                 for node in way.nds:
                     node_histogram[node] += 1
 
-        #use that histogram to split all ways, replacing the member set of ways
+        # use that histogram to split all ways, replacing the member set of ways
         new_ways = {}
         for id, way in self.ways.items():
             split_ways = way.split(node_histogram)
