@@ -12,3 +12,11 @@ repos:
     rev: 19.10b0
     hooks:
     -   id: black
+-   repo: https://github.com/asottile/seed-isort-config
+    rev: v1.9.4
+    hooks:
+    -   id: seed-isort-config
+-   repo: https://github.com/timothycrosley/isort
+    rev: 4.3.21-2
+    hooks:
+    -   id: isort
