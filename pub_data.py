@@ -10,7 +10,7 @@ class Pub:
         address: str = None,
         coordinates=None,
         has_funny_smell=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Plain Ol' Data class for a pub.
@@ -51,8 +51,8 @@ PUBS = [
     Pub(
         "The Chequers",
         1.0,
-        "The Chequers, 131, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4DH, United Kingdom",
-        coordinates=(51.759109, -1.1974538),
+        address="The Chequers, 131 High Street, Oxford, Oxfordshire, South East, England, OX1 4DH, United Kingdom",
+        coordinates=(51.752061, -1.256685),
     ),
     Pub(
         "The Crown",
@@ -63,7 +63,7 @@ PUBS = [
     Pub(
         "The Eagle and Child",
         0.65,
-        "Eagle and Child, 49, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3LU, United Kingdom",
+        address="Eagle and Child, 49, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3LU, United Kingdom",
         coordinates=(51.757221099999995, -1.2603284108858848),
         has_funny_smell=True,
     ),
@@ -379,7 +379,26 @@ PUBS = [
         address="252-242 Marston Rd, Oxford",
         coordinates=(51.7594972, -1.2368538),
     ),
+    Pub(
+        "The Seacourt Bridge",
+        3.86,
+        address="78 West Way, Botley, Oxford, OX2 0JB, United Kingdom",
+        coordinates=(51.751766, -1.2398877),
+    ),
+    Pub(
+        "Keble College Bar",
+        0.482,
+        address="Keble College, Parks Road, Oxford, OX1 3PG, United Kingdom",
+        coordinates=(51.758508, -1.257914),
+    ),
 ]
 
 for PUB in PUBS:
     PUB.coordinates = (PUB.coordinates[1], PUB.coordinates[0])
+
+if __name__ == "__main__":
+    with open("./pub_data.csv", "w") as fi:
+        PUB_KEYS = PUBS[0].__dict__.keys()
+        fi.write(", ".join(PUB_KEYS) + "\n")
+        for PUB in PUBS:
+            fi.write(", ".join([f' "{PUB.__dict__[key]}" ' for key in PUB_KEYS]) + "\n")
