@@ -10,6 +10,8 @@ class Pub:
         address: str = None,
         coordinates=None,
         has_funny_smell=False,
+        cheapest_pint: float = float("inf"),
+        is_open=True,
         **kwargs,
     ):
         """
@@ -28,11 +30,10 @@ class Pub:
         self.address = address
         self.coordinates = coordinates
         self.has_funny_smell = has_funny_smell
+        self.cheapest_pint = cheapest_pint
+        self.is_open = is_open
         for key, val in kwargs.items():
-            __setattr__(self, key, val)
-
-    def __getattr__(self, attr):
-        return None
+            self.__setattr__(self, key, val)
 
 
 PUBS = [
@@ -66,6 +67,7 @@ PUBS = [
         address="Eagle and Child, 49, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3LU, United Kingdom",
         coordinates=(51.757221099999995, -1.2603284108858848),
         has_funny_smell=True,
+        is_open=False,
     ),
     Pub(
         "The Four Candles",
@@ -98,8 +100,15 @@ PUBS = [
         address="Lamb and Flag, St Giles', Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3JS, United Kingdom",
         coordinates=(51.757404699999995, -1.2593104924183205),
         has_funny_smell=True,
+        is_open=False,
     ),
-    # Pub("The Mitre", 1.0, address="The Mitre, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4AQ, United Kingdom", coordinates= (51.7523948, -1.2559797928120555)),
+    Pub(
+        "The Mitre",
+        1.0,
+        address="The Mitre, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4AQ, United Kingdom",
+        coordinates=(51.7523948, -1.2559797928120555),
+        is_open=False,
+    ),
     Pub(
         "The Old Tom",
         1.2,
@@ -116,25 +125,25 @@ PUBS = [
     Pub(
         "The Oxford Retreat",
         1.4,
-        address="  The Oxford Retreat, 1-2, Hythe Bridge Street, Jericho, Oxford, Oxfordshire, South East, England, OX1 2TA, United Kingdom ",
+        address="The Oxford Retreat, 1-2, Hythe Bridge Street, Jericho, Oxford, Oxfordshire, South East, England, OX1 2TA, United Kingdom ",
         coordinates=(51.7532923, -1.2656159),
     ),
     Pub(
         "The Red Lion",
         1.1,
-        address="  The Red Lion, 40-42, Oxford Road, Old Marston, Oxford, Oxfordshire, South East, England, OX3 0PH, United Kingdom ",
-        coordinates=(51.7723529, -1.2363012),
+        address="The Red Lion, 40-42, Oxford Road, Old Marston, Oxford, Oxfordshire, South East, England, OX3 0PH, United Kingdom ",
+        coordinates=(51.772328283812755, -1.236240367754539),
     ),
     Pub(
         "The St Aldate's Tavern",
         1.2,
-        address="  St Aldate's Tavern, 108, St Aldate's, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1BU, United Kingdom ",
+        address="St Aldate's Tavern, 108, St Aldate's, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1BU, United Kingdom ",
         coordinates=(51.75129325, -1.2574114966141754),
     ),
     Pub(
         "The Three Goats Heads",
         1.0,
-        address="  Three Goats Heads, 3A, St Michael's Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2DR, United Kingdom ",
+        address="Three Goats Heads, 3A, St Michael's Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2DR, United Kingdom ",
         coordinates=(51.7534232, -1.2590829),
     ),
     Pub(
@@ -146,7 +155,7 @@ PUBS = [
     Pub(
         "The Wheatsheaf",
         1.0,
-        address="  The Wheatsheaf, 129, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4DF, United Kingdom ",
+        address="The Wheatsheaf, 129, High Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 4DF, United Kingdom ",
         coordinates=(51.75174, -1.256298),
     ),
     Pub(
@@ -158,38 +167,38 @@ PUBS = [
     Pub(
         "The White Rabbit",
         0.650,
-        address="  The White Rabbit, 21, Friars Entry, Jericho, Oxford, Oxfordshire, South East, England, OX1 2BY, United Kingdom ",
+        address="The White Rabbit, 21, Friars Entry, Jericho, Oxford, Oxfordshire, South East, England, OX1 2BY, United Kingdom ",
         coordinates=(51.7544715, -1.2607005706770802),
     ),
     Pub(
         "The Castle",
         1.6,
-        address="  The Castle, 24, Paradise Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1LD, United Kingdom ",
+        address="The Castle, 24, Paradise Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1LD, United Kingdom ",
         coordinates=(51.7507181, -1.2619326553382662),
     ),
     Pub(
         "The Jam Factory",
         1.6,
-        address="  The Jam Factory, Hollybush Row, Jericho, Oxford, Oxfordshire, South East, England, OX1 1HU, United Kingdom ",
+        address="The Jam Factory, Hollybush Row, Jericho, Oxford, Oxfordshire, South East, England, OX1 1HU, United Kingdom ",
         coordinates=(51.752345500000004, -1.2677711621899035),
     ),
     Pub(
         "The Jolly Farmers",
         1.5,
-        address="  The Jolly Farmers, 20, Paradise Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1LD, United Kingdom ",
+        address="The Jolly Farmers, 20, Paradise Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1LD, United Kingdom ",
         coordinates=(51.750692349999994, -1.2626142092525714),
     ),
     Pub(
         "The Swan and Castle",
         1.5,
         is_spoons=True,
-        address="  The Swan and Castle, 40, Castle Street Square, Oxford Castle Quarter, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1AY, United Kingdom ",
+        address="The Swan and Castle, 40, Castle Street Square, Oxford Castle Quarter, Grandpont, Oxford, Oxfordshire, South East, England, OX1 1AY, United Kingdom ",
         coordinates=(51.7511807, -1.2618425),
     ),
     Pub(
         "The Old Bookbinders",
         1.5,
-        address="  The Old Bookbinders, 17-18, Victor Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6BT, United Kingdom ",
+        address="The Old Bookbinders, 17-18, Victor Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6BT, United Kingdom ",
         coordinates=(51.7584939, -1.2697797),
     ),
     Pub(
@@ -202,80 +211,87 @@ PUBS = [
     Pub(
         "The Jericho Tavern",
         1.3,
-        address="  Jericho Tavern, 56, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6BU, United Kingdom ",
+        address="Jericho Tavern, 56, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6BU, United Kingdom ",
         coordinates=(51.76017715, -1.2664924695983872),
     ),
     Pub(
         "Jude the Obscure",
         1.2,
-        address="  Jude the Obscure, 51-54, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6AE, United Kingdom ",
+        address="Jude the Obscure, 51-54, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6AE, United Kingdom ",
         coordinates=(51.7599843, -1.26628205555838),
     ),
     Pub(
         "The Rickety Press",
         1.4,
-        address="  The Rickety Press, 67, Cranham Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6DS, United Kingdom ",
+        address="The Rickety Press, 67, Cranham Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6DS, United Kingdom ",
         coordinates=(51.7598827, -1.2683244378576402),
     ),
     Pub(
         "The Royal Oak",
         0.9,
-        address="  The Royal Oak, 42-44, Woodstock Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6HT, United Kingdom ",
+        address="The Royal Oak, 42-44, Woodstock Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6HT, United Kingdom ",
         coordinates=(51.7606495, -1.2616332397836085),
     ),
     Pub(
         "The Victoria",
         1.5,
-        address="  The Victoria, 90, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6EB, United Kingdom ",
+        address="The Victoria, 90, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6EB, United Kingdom ",
         coordinates=(51.76173755, -1.2678698728609619),
+    ),
+    Pub(
+        "The Victoria Arms",
+        2.5,
+        address="Mill Ln, Marston, Oxford OX3 0QA",
+        coordinates=(51.77684742696684, -1.2472305881209258),
+        is_open=False,
     ),
     Pub(
         "The Anchor",
         2.0,
-        address="  The Anchor, 2, Hayfield Road, Walton Manor, Oxford, Oxfordshire, South East, England, OX2 6TT, United Kingdom ",
+        address="The Anchor, 2, Hayfield Road, Walton Manor, Oxford, Oxfordshire, South East, England, OX2 6TT, United Kingdom ",
         coordinates=(51.7677013, -1.2690480938820095),
     ),
     Pub(
         "The Gardener's Arms North Parade",
         1.2,
-        address="  Gardeners Arms, 8, North Parade Avenue, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6LX, United Kingdom ",
+        address="Gardeners Arms, 8, North Parade Avenue, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6LX, United Kingdom ",
         coordinates=(51.7644918, -1.2620828),
     ),
     Pub(
         "The Gardener's Arms Plantation Road",
         1.4,
-        address="  The Gardeners Arms, 39, Plantation Road, Walton Manor, Oxford, Oxfordshire, South East, England, OX2 6JE, United Kingdom ",
+        address="The Gardeners Arms, 39, Plantation Road, Walton Manor, Oxford, Oxfordshire, South East, England, OX2 6JE, United Kingdom ",
         coordinates=(51.76273625, -1.2665866949651243),
     ),
     Pub(
         "The Rose and Crown",
         1.2,
-        address="  The Rose And Crown, 14, North Parade Avenue, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6LX, United Kingdom ",
+        address="The Rose And Crown, 14, North Parade Avenue, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6LX, United Kingdom ",
         coordinates=(51.7647059, -1.2616289),
     ),
     Pub(
         "The Fishes",
         3.4,
-        address="  The Fishes, North Hinksey Village, North Hinksey, Vale of White Horse, Oxfordshire, South East, England, OX2 0NA, United Kingdom ",
+        address="The Fishes, North Hinksey Village, North Hinksey, Vale of White Horse, Oxfordshire, South East, England, OX2 0NA, United Kingdom ",
         coordinates=(51.7452124, -1.2825397),
     ),
     Pub(
         "Tap Social Movement",
         3.5,
         has_pub_quiz=True,
-        address="  Tap Social Movement, 27, Southern By-pass Road, North Hinksey, Vale of White Horse, Oxfordshire, South East, England, OX2 0LX, United Kingdom ",
+        address="Tap Social Movement, 27, Southern By-pass Road, North Hinksey, Vale of White Horse, Oxfordshire, South East, England, OX2 0LX, United Kingdom ",
         coordinates=(51.7512935, -1.295217),
     ),
     Pub(
         "The Angel and Greyhound",
         1.4,
-        address="  Angel and Greyhound, 30, St Clements Street, New Marston, Oxford, Oxfordshire, South East, England, OX4 1AB, United Kingdom ",
+        address="Angel and Greyhound, 30, St Clements Street, New Marston, Oxford, Oxfordshire, South East, England, OX4 1AB, United Kingdom ",
         coordinates=(51.75033915, -1.2426479795125314),
     ),
     Pub(
         "The Half Moon",
         1.3,
-        address="  The Half Moon, 17-18, St Clements Street, New Marston, Oxford, Oxfordshire, South East, England, OX4 1AB, United Kingdom ",
+        address="The Half Moon, 17-18, St Clements Street, New Marston, Oxford, Oxfordshire, South East, England, OX4 1AB, United Kingdom ",
         coordinates=(51.7502867, -1.2434793),
     ),
     Pub(
@@ -300,13 +316,13 @@ PUBS = [
     Pub(
         "The Black Swan",
         2.0,
-        address="  Black Swan, 11, Crown Street, Oxford, Oxfordshire, South East, England, OX4 1QG, United Kingdom ",
+        address="Black Swan, 11, Crown Street, Oxford, Oxfordshire, South East, England, OX4 1QG, United Kingdom ",
         coordinates=(51.7466865, -1.2369835132352924),
     ),
     Pub(
         "The Cape of Good Hope",
         1.3,
-        address="  Cape of Good Hope, 1, Iffley Road, Grandpont, Oxford, Oxfordshire, South East, England, OX4 1EA, United Kingdom ",
+        address="Cape of Good Hope, 1, Iffley Road, Grandpont, Oxford, Oxfordshire, South East, England, OX4 1EA, United Kingdom ",
         coordinates=(51.74968525, -1.243796360612483),
     ),
     Pub(
@@ -319,26 +335,26 @@ PUBS = [
         "The City Arms",
         2.4,
         has_beer=False,
-        address="  The City Arms, 288, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1UR, United Kingdom ",
+        address=" he City Arms, 288, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1UR, United Kingdom ",
         coordinates=(51.744935299999995, -1.2301129178143755),
     ),
     Pub(
         "The Cowley Retreat",
         2.0,
-        address="  The Cowley Retreat, 172, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1UE, United Kingdom ",
+        address="The Cowley Retreat, 172, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1UE, United Kingdom ",
         coordinates=(51.747191799999996, -1.2355539858165292),
     ),
     Pub(
         "BrewDog",
         1.8,
-        address="  Brewdog, 119, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1JH, United Kingdom ",
+        address="Brewdog, 119, Cowley Road, Oxford, Oxfordshire, South East, England, OX4 1JH, United Kingdom ",
         coordinates=(51.74807735, -1.2371606804715767),
     ),
     Pub(
         "The Mad Hatter",
         1.5,
         has_beer=False,
-        address="  The Mad Hatter, 43, Iffley Road, Grandpont, Oxford, Oxfordshire, South East, England, OX4 1EA, United Kingdom ",
+        address="The Mad Hatter, 43, Iffley Road, Grandpont, Oxford, Oxfordshire, South East, England, OX4 1EA, United Kingdom ",
         coordinates=(51.7484099, -1.2425581),
     ),
     Pub(
@@ -372,6 +388,7 @@ PUBS = [
         0.2,
         address="University Club, 11, Mansfield Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3SZ, United Kingdom",
         coordinates=(51.757122800000005, -1.251335944893838),
+        is_open=False,
     ),
     Pub(
         "The Up in Arms",
@@ -383,13 +400,15 @@ PUBS = [
         "The Seacourt Bridge",
         3.86,
         address="78 West Way, Botley, Oxford, OX2 0JB, United Kingdom",
-        coordinates=(51.751766, -1.2398877),
+        coordinates=(51.75174517720427, -1.298835168539639),
+        is_open=False,
     ),
     Pub(
         "Keble College Bar",
         0.482,
         address="Keble College, Parks Road, Oxford, OX1 3PG, United Kingdom",
         coordinates=(51.758508, -1.257914),
+        is_open=False,
     ),
 ]
 

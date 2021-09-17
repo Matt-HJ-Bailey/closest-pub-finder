@@ -1,5 +1,8 @@
+import sys
+
 import pickle as pkl
-import random
+
+from collections import defaultdict
 
 import matplotlib as mpl
 import matplotlib.patheffects as path_effects
@@ -7,21 +10,37 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from geopy.distance import geodesic
-from geopy.geocoders import Nominatim
-from scipy.spatial import Voronoi, voronoi_plot_2d
+from scipy.spatial import Voronoi
+from typing import Tuple, List, Callable
 
 from osm import read_osm
 from pub_data import PUBS
 
 
+PTCL_LOCATION = (-1.2535525, 51.7593620)
+GLOUCESTER_GREEN = (-1.26248, 51.75397)
+PERSON_VETOS = defaultdict(set)
+PERSON_VETOS["Max"] = {
+    "The Lamb and Flag",
+}
+PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan"}
+
+DISTANCE_CUTOFF = 2.0
+
+_closest_node_cache = {}
+
+
 def find_closest_node(current_pos, positions):
     current_distance = np.inf
     node_index = None
+    if current_pos in _closest_node_cache:
+        return _closest_node_cache[current_pos]
     for key, val in positions.items():
         distance = geodesic(current_pos, val)
         if distance < current_distance:
             current_distance = distance
             node_index = key
+    _closest_node_cache[current_pos] = node_index
     return node_index
 
 
@@ -30,12 +49,12 @@ def load_graph(filename):
         nx_graph = nx.read_gpickle(filename)
         print("Loading graph from pickle")
     except FileNotFoundError:
-        nx_graph = read_osm("map-filter.osm")
+        nx_graph = read_osm("planet_-1.275,51.745_-1.234,51.762.osm")
         nx.write_gpickle(nx_graph, filename)
     return nx_graph
 
 
-def find_all_closest_nodes(pubs, regenerate=False):
+def find_all_closest_nodes(pubs, positions, regenerate=False):
     closest_nodes = dict()
     try:
         if not regenerate:
@@ -47,204 +66,246 @@ def find_all_closest_nodes(pubs, regenerate=False):
     except TypeError as e:
         print(e)
 
-    for pub in PUBS:
+    for pub in pubs:
         print("Finding closest", pub.name)
-        closest_node = find_closest_node(pub.coordinates, POSITIONS)
+        closest_node = find_closest_node(pub.coordinates, positions)
         closest_nodes[pub.name] = closest_node
     pkl.dump(closest_nodes, open("all-closest-nodes.pkl", "wb"))
     return closest_nodes
 
 
-print(f"I have found {len(PUBS)} pubs.")
+def plot_pub_map(graph, highlight_edges, pubs, ax=None):
+    if ax is None:
+        _, ax = plt.subplots()
+    positions = nx.get_node_attributes(graph, "pos")
+    # voronoi_plot_2d(vor, ax=AX, show_points=True, show_vertices=False, line_colors="red")
+    nx.draw_networkx_edges(graph, pos=positions, ax=ax)
 
-PTCL_LOCATION = (-1.2535525, 51.7593620)
+    min_x = min(pos[0] for pos in positions.values())
+    max_x = max(pos[0] for pos in positions.values())
+    min_y = min(pos[1] for pos in positions.values())
+    max_y = max(pos[1] for pos in positions.values())
 
-
-GLOUCESTER_GREEN = (-1.26248, 51.75397)
-GEODESIC_DISTANCES = [geodesic(PTCL_LOCATION, pub.coordinates).km for pub in PUBS]
-print(GEODESIC_DISTANCES)
-DISTANCE_CUTOFF = 1.0
-EXPENSIVE_PUB_NAMES = {"The Chequers", "BrewDog", "The Anchor", "The Kings Arms"}
-PERSON_VETOS = {
-    "Max": {"The Lamb and Flag"},
-    "Matt": {"The Half Moon", "The Black Swan"},
-    "Mike": {"The Royal Oak"},
-}
-
-PUBS_WITHIN_DISTANCE = np.array([pub.distance < DISTANCE_CUTOFF for pub in PUBS])
-print(
-    f"{np.sum(PUBS_WITHIN_DISTANCE)} out of {len(PUBS)} are within {DISTANCE_CUTOFF}km."
-)
-
-PUBS_THAT_ARE_NOT_SPOONS = np.array([pub.is_spoons == False for pub in PUBS])
-print(f"{np.sum(PUBS_THAT_ARE_NOT_SPOONS)} out of {len(PUBS)} are not Spoons.")
-PUBS_WITHOUT_PUB_QUIZ = np.array([pub.has_pub_quiz == False for pub in PUBS])
-print(
-    f"{np.sum(PUBS_WITHOUT_PUB_QUIZ)} out of {len(PUBS)} do not have a pub quiz tonight."
-)
-PUBS_WITHOUT_LIVE_MUSIC = np.array([pub.has_live_music == False for pub in PUBS])
-print(
-    f"{np.sum(PUBS_WITHOUT_LIVE_MUSIC)} out of {len(PUBS)} do not have live music tonight."
-)
-PUBS_WITH_GOOD_BEER = np.array([pub.has_beer == True for pub in PUBS])
-print(
-    f"{np.sum(PUBS_WITH_GOOD_BEER)} out of {len(PUBS)} have what Matt considers to be drinkable beer."
-)
-PUBS_WITHOUT_FUNNY_SMELL = np.array([pub.has_funny_smell == False for pub in PUBS])
-print(
-    f"{np.sum(PUBS_WITHOUT_FUNNY_SMELL)} out of {len(PUBS)} do not have a funny smell according to Spanish Issy."
-)
-PUBS_THAT_ARE_NOT_EXPENSIVE = np.array(
-    [pub.name not in EXPENSIVE_PUB_NAMES for pub in PUBS]
-)
-print(
-    f"{np.sum(PUBS_THAT_ARE_NOT_EXPENSIVE)} out of {len(PUBS)} have what Matt considers to be reasonable prices."
-)
-PUB_REQUIREMENTS = np.logical_and.reduce(
-    [
-        PUBS_WITHIN_DISTANCE,
-        PUBS_THAT_ARE_NOT_SPOONS,
-        PUBS_WITHOUT_PUB_QUIZ,
-        PUBS_WITHOUT_LIVE_MUSIC,
-        PUBS_WITH_GOOD_BEER,
-        PUBS_THAT_ARE_NOT_EXPENSIVE,
-        PUBS_WITHOUT_FUNNY_SMELL,
-    ]
-)
-print(
-    f"{np.sum(PUB_REQUIREMENTS)} out of {len(PUBS)} have meet all of these requirements."
-)
-
-
-UNVETOED = np.ones(len(PUBS), dtype=bool)
-for person, vetos in PERSON_VETOS.items():
-    PUBS_PERSON_WILL_GO_TO = np.array(
-        [pub.name not in PERSON_VETOS[person] for pub in PUBS]
+    nx.draw_networkx_edges(
+        graph,
+        pos=nx.get_node_attributes(graph, "pos"),
+        ax=ax,
+        edgelist=highlight_edges,
+        edge_color="red",
+        width=2.0,
     )
+    ax.scatter(
+        [pub.coordinates[0] for pub in pubs],
+        [pub.coordinates[1] for pub in pubs],
+        s=25,
+        c="blue",
+    )
+    ax.set_xlim(min_x, max_x)
+    ax.set_ylim(min_y, max_y)
+    ax.axis("off")
+
+    return ax
+
+
+def plot_pub_voronoi(pubs, ax=None, with_labels=True):
+    if ax is None:
+        _, ax = plt.subplots()
+
+    points = np.array([pub.coordinates for pub in pubs])
+
+    points = np.append(
+        points, [[999, 999], [-999, 999], [999, -999], [-999, -999]], axis=0
+    )
+    vor = Voronoi(points)
+
+    dual_graph = nx.Graph()
+    for pub_id, point_region in enumerate(vor.point_region):
+        vertices_a = set(vor.regions[point_region])
+        for other_pub_id, other_point_region in enumerate(vor.point_region):
+            vertices_b = set(vor.regions[other_point_region])
+            overlap = vertices_a.intersection(vertices_b)
+            if len(overlap) == 2:
+                dual_graph.add_edge(pub_id, other_pub_id)
+    coloration = nx.greedy_color(dual_graph, interchange=True)
+
+    print(coloration)
+    polys = []
+    colors = []
+    regions = []
+    for point_region in vor.point_region:
+        region = vor.regions[point_region]
+        if -1 in region:
+            # TODO: Find the effective infinite point for this
+            continue
+        coordinates = [
+            np.array([vor.vertices[vertex][0], vor.vertices[vertex][1]])
+            for vertex in region
+        ]
+        if coordinates:
+            coordinates = np.vstack(coordinates)
+            polys.append(
+                mpl.patches.Polygon(coordinates, linewidth=1.0, edgecolor="black")
+            )
+    colors = [coloration[key] for key in coloration.keys()]
+    for pub_id, point_region in enumerate(vor.point_region):
+        coordinates = [
+            np.array([vor.vertices[vertex][1], vor.vertices[vertex][0]])
+            for vertex in vor.regions[point_region]
+        ]
+
+        if coordinates:
+            coordinates = np.vstack(coordinates)
+        if np.any(np.abs(coordinates) > 300):
+            continue
+
+        centroid = np.mean(coordinates, axis=0)
+        if with_labels:
+            text = ax.text(
+                centroid[1],
+                centroid[0],
+                pubs[pub_id].name,
+                horizontalalignment="center",
+                color="red",
+                fontsize="x-small",
+            )
+            text.set_path_effects(
+                [
+                    path_effects.Stroke(linewidth=1, foreground="black"),
+                    path_effects.Normal(),
+                ]
+            )
+
+    polys = mpl.collections.PatchCollection(
+        polys, alpha=0.5, linewidth=2.0, edgecolor="black"
+    )
+    polys.set_cmap("Set3")
+    polys.set_array(np.array(colors))
+    ax.add_collection(polys)
+
+    return ax
+
+
+def find_satisfied_constraints(pubs, constraints: Tuple[str, Callable]):
+    """
+    Find which pub satisfy a list of constraints.
+
+    Provide the constraints as a list of (attr, predicate) tuples
+    where the attribute is something we can look up in a pub
+    as getattr(pub, attr), and the predicate operates on that.
+    """
+    total_matches_arr = np.ones(len(pubs), dtype=bool)
+    for attr, pred in constraints:
+        matches_arr = np.ones(len(pubs), dtype=bool)
+        for idx, pub in enumerate(pubs):
+            matches_arr[idx] = pred(getattr(pub, attr))
+        print(f"{np.sum(matches_arr)} pubs meet constraint {attr}.")
+        total_matches_arr = np.logical_and(matches_arr, total_matches_arr)
+
+    return [pubs[idx] for idx in range(len(pubs)) if total_matches_arr[idx]]
+
+
+def populate_distances(pubs, pubgoers, person_locations, graph):
+    positions = nx.get_node_attributes(graph, "pos")
+    closest_nodes = find_all_closest_nodes(pubs, positions)
+    print(f"Populating distances, {len(pubs)}, {len(person_locations)}")
+    for pub in pubs:
+        distance = 0.0
+        for pubgoer in pubgoers:
+
+            loc = person_locations[pubgoer]
+            source_node = find_closest_node(loc, positions)
+            try:
+                shortest_distance = nx.shortest_path_length(
+                    graph,
+                    source=source_node,
+                    target=closest_nodes[pub.name],
+                    weight="length",
+                )
+                distance += shortest_distance
+                print(
+                    f"shortest path from {pub.name} to {pubgoer} is {shortest_distance}"
+                )
+            except nx.networkxnopath:
+                print(f"could not find a path between {pub.name} and {pubgoer}")
+        pub.distance = distance
+    return pubs
+
+
+def main():
+    print(f"I have found {len(PUBS)} pubs.")
+    if len(sys.argv) > 1:
+        pubgoers = sys.argv[1:]
+    else:
+        pubgoers = ["Matt", "Martin", "Max"]
+    person_locations = defaultdict(lambda: PTCL_LOCATION)
+    person_locations["Matt"] = (-1.2951793697897114, 51.742673908496585)
+    person_locations["Max"] = PTCL_LOCATION
+    person_locations["Martin"] = PTCL_LOCATION
+
+    nx_graph = load_graph("map-filter.gpickle")
+    largest_component = list(nx.connected_components(nx_graph))[0]
+    nx_graph = nx_graph.subgraph(largest_component).copy()
+
+    positions = {
+        node: np.array([nx_graph.nodes[node]["lon"], nx_graph.nodes[node]["lat"]])
+        for node in nx_graph.nodes
+    }
+    nx.set_node_attributes(nx_graph, positions, name="pos")
+    pubs = [pub for pub in PUBS if pub.is_open]
+    pubs = populate_distances(pubs, pubgoers, person_locations, nx_graph)
+
+    pub_vetos = set(name for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
+
+    valid_pubs = find_satisfied_constraints(
+        pubs,
+        [
+            ("has_beer", lambda has_beer: has_beer),
+            ("is_spoons", lambda is_spoons: not is_spoons),
+            ("distance", lambda distance: distance < DISTANCE_CUTOFF * len(pubgoers)),
+            (
+                "cheapest_pint",
+                lambda cheapest_pint: np.isinf(cheapest_pint) or cheapest_pint < 5.0,
+            ),
+            ("has_pub_quiz", lambda has_pub_quiz: not has_pub_quiz),
+            ("has_live_music", lambda has_live_music: not has_live_music),
+            ("name", lambda name: name not in pub_vetos),
+            ("has_funny_smell", lambda has_funny_smell: not has_funny_smell),
+        ],
+    )
+    print(f"We are left with {len(valid_pubs)} pubs. These are:")
+    print(", ".join(pub.name for pub in valid_pubs))
+
+    distance_weights = np.argsort([-pub.distance for pub in valid_pubs])
+    print([pub.distance for pub in valid_pubs])
+    price_weights = np.argsort([-pub.cheapest_pint for pub in valid_pubs])
+    weights = (distance_weights + price_weights).astype(np.float64)
+    weights = np.exp(weights) / np.sum(np.exp(weights))
+    rng = np.random.default_rng()
+    random_idx = rng.choice([idx for idx in range(len(valid_pubs))], p=weights)
+    random_pub = valid_pubs[random_idx]
     print(
-        f"{np.sum(PUBS_PERSON_WILL_GO_TO)} out of {len(PUBS)} have not been veto'd by {person}."
+        f"I have randomly chosen {random_pub.name} with probability {weights[random_idx]*100:.1f}%"
     )
-    UNVETOED = np.logical_and(UNVETOED, PUBS_PERSON_WILL_GO_TO)
 
+    FIG, AX = plt.subplots()
 
-PUB_REQUIREMENTS = np.logical_and(PUB_REQUIREMENTS, UNVETOED)
-
-print(f"We are left with {np.sum(PUB_REQUIREMENTS)} pubs. These are:")
-for index, cond in enumerate(PUB_REQUIREMENTS):
-    if cond:
-        print(PUBS[index].name, end=", ")
-print("")
-PUB_LIST = [pub for i, pub in enumerate(PUBS) if PUB_REQUIREMENTS[i]]
-RANDOM_CHOICE = random.choice(PUB_LIST).name
-print(f"I have randomly chosen {RANDOM_CHOICE}.")
-
-
-points = np.array([pub.coordinates for pub in PUBS])
-
-
-FIG, AX = plt.subplots()
-
-vor = Voronoi(points)
-polys = []
-for region in vor.regions:
-    if -1 in region:
-        continue
-    coordinates = [
-        np.array([vor.vertices[vertex][1], vor.vertices[vertex][0]])
-        for vertex in region
+    ptcl_node = find_closest_node(PTCL_LOCATION, positions)
+    pub_node = find_closest_node(random_pub.coordinates, positions)
+    choice_path = nx.shortest_path(
+        nx_graph, source=ptcl_node, target=pub_node, weight="length"
+    )
+    edge_list = [
+        (choice_path[node], choice_path[node + 1])
+        for node in range(len(choice_path) - 1)
     ]
-    if coordinates:
-        coordinates = np.vstack(coordinates)
-        polys.append(mpl.patches.Polygon(coordinates, linewidth=1.0, edgecolor="black"))
-region = None
-coordinates = None
-for pub_id, point_region in enumerate(vor.point_region):
-    coordinates = [
-        np.array([vor.vertices[vertex][1], vor.vertices[vertex][0]])
-        for vertex in vor.regions[point_region]
-    ]
-    if coordinates:
-        coordinates = np.vstack(coordinates)
-    centroid = np.mean(coordinates, axis=0)
-    text = AX.text(
-        centroid[0],
-        centroid[1],
-        PUBS[pub_id].name,
-        horizontalalignment="center",
-        color="red",
-    )
-    text.set_path_effects(
-        [path_effects.Stroke(linewidth=3, foreground="black"), path_effects.Normal()]
-    )
 
-colors = 100 * np.random.rand(len(polys))
-polys = mpl.collections.PatchCollection(
-    polys, alpha=0.5, linewidth=2.0, edgecolor="black"
-)
-polys.set_cmap("Set3")
-polys.set_array(np.array(colors))
-
-NX_GRAPH = load_graph("map-filter.gpickle")
-LARGEST_COMPONENT = list(nx.connected_components(NX_GRAPH))[0]
-NX_GRAPH = NX_GRAPH.subgraph(LARGEST_COMPONENT).copy()
-
-POSITIONS = {
-    node: np.array([NX_GRAPH.nodes[node]["lon"], NX_GRAPH.nodes[node]["lat"]])
-    for node in NX_GRAPH.nodes
-}
+    fig, ax = plt.subplots()
+    ax = plot_pub_map(nx_graph, edge_list, pubs, ax=ax)
+    ax = plot_pub_voronoi(pubs, ax=ax, with_labels=True)
+    # ax.set_xlim(-1.27, -1.2540034)
+    # ax.set_ylim(51.7400023, 51.7619972)
+    fig.savefig("pub-map.png", dpi=500)
 
 
-CLOSEST_NODES = find_all_closest_nodes(PUBS, regenerate=False)
-PTCL_NODE = find_closest_node(PTCL_LOCATION, POSITIONS)
-print("Closest to the PTCL is:", PTCL_NODE)
-for PUB in PUBS:
-    name = PUB.name
-    try:
-        shortest_distance = nx.shortest_path_length(
-            NX_GRAPH, source=PTCL_NODE, target=CLOSEST_NODES[name], weight="length"
-        )
-        print(
-            f"The shortest path between {name} and PTCL is {shortest_distance}, compared to {PUB.distance}"
-        )
-    except nx.NetworkXNoPath:
-        print(f"Could not find a path between {name} and the PTCL")
-
-for pub in PUBS:
-    closest_node = CLOSEST_NODES[pub.name]
-    print(
-        f"The closest street node to {pub.name} is {closest_node}, which is at {POSITIONS[closest_node]} compared to {pub.coordinates}"
-    )
-
-CHOICE_PATH = nx.shortest_path(
-    NX_GRAPH, source=PTCL_NODE, target=CLOSEST_NODES[RANDOM_CHOICE], weight="length"
-)
-EDGE_LIST = [
-    (CHOICE_PATH[node], CHOICE_PATH[node + 1]) for node in range(len(CHOICE_PATH) - 1)
-]
-
-
-min_x = min(pos[0] for pos in POSITIONS.values())
-max_x = max(pos[0] for pos in POSITIONS.values())
-min_y = min(pos[1] for pos in POSITIONS.values())
-max_y = max(pos[1] for pos in POSITIONS.values())
-
-print("Plotting graph")
-
-
-# voronoi_plot_2d(vor, ax=AX, show_points=True, show_vertices=False, line_colors="red")
-nx.draw_networkx_edges(NX_GRAPH, pos=POSITIONS, ax=AX)
-nx.draw_networkx_edges(
-    NX_GRAPH, pos=POSITIONS, ax=AX, edgelist=EDGE_LIST, edge_color="red", width=2.0
-)
-AX.scatter(
-    [pub.coordinates[0] for pub in PUBS],
-    [pub.coordinates[1] for pub in PUBS],
-    s=25,
-    c="blue",
-)
-AX.set_xlim(min_x, max_x)
-AX.set_ylim(min_y, max_y)
-AX.add_collection(polys)
-AX.axis("off")
-plt.show()
-print("plotted")
+if __name__ == "__main__":
+    main()
