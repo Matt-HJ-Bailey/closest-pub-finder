@@ -11,11 +11,9 @@ import numpy as np
 import pandas as pd
 from geopy.distance import geodesic
 
-
 from osm import read_osm
 from pub_data import PUBS, Pub
-from pub_drawing import plot_pub_voronoi, plot_highlighted_paths, plot_pub_map
-
+from pub_drawing import plot_highlighted_paths, plot_pub_map, plot_pub_voronoi
 
 PTCL_LOCATION = (-1.2535525, 51.7593620)
 PERSON_VETOS = defaultdict(set)

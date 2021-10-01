@@ -1,16 +1,15 @@
-import networkx as nx
-import numpy as np
-from scipy.spatial import Voronoi
+import logging
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib as mpl
-from matplotlib import cm
-import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from matplotlib import cm
+from scipy.spatial import Voronoi
 
 from pub_data import Pub
-import logging
-
-from typing import List, Tuple, Optional, Dict
 
 
 def sort_coordinates_anticlockwise(coordinates: np.ndarray) -> np.ndarray:
@@ -77,7 +76,7 @@ def plot_highlighted_paths(
             width=2.0,
         )
     return graph
-    
+
 
 def plot_pub_voronoi(
     pubs: List[Pub], ax: Optional[mpl.axes.Axes] = None, with_labels: bool = True
@@ -188,7 +187,7 @@ def plot_pub_voronoi(
     ax.add_collection(polys)
 
     return ax
-    
+
 
 def plot_pub_map(
     graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] = None
@@ -234,4 +233,3 @@ def plot_pub_map(
     # ax.axis("off")
 
     return ax
-    
