@@ -12,6 +12,7 @@ class Pub:
         has_funny_smell=False,
         cheapest_pint: float = float("inf"),
         is_open=True,
+        is_college=False,
         **kwargs,
     ):
         """
@@ -32,8 +33,12 @@ class Pub:
         self.has_funny_smell = has_funny_smell
         self.cheapest_pint = cheapest_pint
         self.is_open = is_open
+        self.is_college = is_college
         for key, val in kwargs.items():
-            self.__setattr__(self, key, val)
+            self.__setattr__(key, val)
+
+    def __repr__(self):
+        return ", ".join(value for attr, value in self.__dict__.iteritems())
 
 
 PUBS = [
@@ -81,6 +86,7 @@ PUBS = [
         1.0,
         address="The Grapes, 7, George Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2AT, United Kingdom",
         coordinates=(51.7537486, -1.2595821),
+        cheapest_pint=4.10,
     ),
     Pub(
         "The Head of the River",
@@ -93,6 +99,7 @@ PUBS = [
         0.6,
         address="King's Arms, 40, Holywell Street, Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3SP, United Kingdom",
         coordinates=(51.7550797, -1.2543214),
+        cheapest_pint=4.80,
     ),
     Pub(
         "The Lamb and Flag",
@@ -145,12 +152,14 @@ PUBS = [
         1.0,
         address="Three Goats Heads, 3A, St Michael's Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2DR, United Kingdom ",
         coordinates=(51.7534232, -1.2590829),
+        cheapest_pint=4.5,
     ),
     Pub(
         "The Turf Tavern",
         0.5,
         address="  Turf Tavern, 7, Bath Place, Grandpont, Oxford, Oxfordshire, South East, England, OX1 3SU, United Kingdom ",
         coordinates=(51.7546944, -1.2528622320221636),
+        cheapest_pint=4.40,
     ),
     Pub(
         "The Wheatsheaf",
@@ -200,6 +209,7 @@ PUBS = [
         1.5,
         address="The Old Bookbinders, 17-18, Victor Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6BT, United Kingdom ",
         coordinates=(51.7584939, -1.2697797),
+        cheapest_pint=4.7,
     ),
     Pub(
         "The Harcourt Arms",
@@ -231,6 +241,7 @@ PUBS = [
         0.9,
         address="The Royal Oak, 42-44, Woodstock Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6HT, United Kingdom ",
         coordinates=(51.7606495, -1.2616332397836085),
+        cheapest_pint=4.5,
     ),
     Pub(
         "The Victoria",
@@ -384,6 +395,18 @@ PUBS = [
         coordinates=(51.74293385, -1.234264793399705),
     ),
     Pub(
+        "The Magdalen Arms",
+        2.5,
+        address="243 Iffley Rd, Oxford OX4 1SJ",
+        coordinates=(51.74121310739812, -1.237149963013011),
+    ),
+    Pub(
+        "The Chester Arms",
+        2.5,
+        address="19 Chester St, Oxford OX4 1SN",
+        coordinates=(51.74162086448089, -1.2408080997768387),
+    ),
+    Pub(
         "The University Club",
         0.2,
         address="University Club, 11, Mansfield Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX1 3SZ, United Kingdom",
@@ -401,14 +424,195 @@ PUBS = [
         3.86,
         address="78 West Way, Botley, Oxford, OX2 0JB, United Kingdom",
         coordinates=(51.75174517720427, -1.298835168539639),
-        is_open=False,
+        is_open=True,
     ),
     Pub(
         "Keble College Bar",
         0.482,
         address="Keble College, Parks Road, Oxford, OX1 3PG, United Kingdom",
         coordinates=(51.758508, -1.257914),
-        is_open=False,
+        is_college=True,
+    ),
+    Pub(
+        "Balliol College Bar",
+        1.0,
+        address="Oxford OX1 3BJ",
+        coordinates=(51.75429651036986, -1.257355471634104),
+        is_college=True,
+    ),
+    Pub(
+        "Univ College Bar",
+        1.0,
+        address="High Street, Oxford",
+        coordinates=(51.75272092229712, -1.2519212901711974),
+        is_college=True,
+    ),
+    Pub(
+        "New College Bar",
+        0.482,
+        address="New College, Holywell Street, OX1 3BN",
+        coordinates=(51.754880595709444, -1.2506204882995613),
+        is_college=True,
+    ),
+    Pub(
+        "The Punter",
+        1.0,
+        address="7 South St, Oxford OX2 0BE",
+        coordinates=(51.7502615399644, -1.2728460920969342),
+        is_open=True,
+    ),
+    Pub(
+        "The Perch",
+        1.0,
+        address="Binsey, Oxford OX2 0NG",
+        coordinates=(51.76500594662904, -1.2878543853121618),
+        is_open=True,
+    ),
+    Pub(
+        "The Trout Inn",
+        1.0,
+        address="195 Godstow Rd, Wolvercote, Oxford OX2 8PN",
+        coordinates=(51.78014624792215, -1.299536247921414),
+        is_open=True,
+    ),
+    Pub(
+        "Jacobs Inn",
+        1.0,
+        address="130 Godstow Rd, Wolvercote, Oxford OX2 8PG",
+        coordinates=(51.78376742414868, -1.2934929523163836),
+    ),
+    Pub(
+        "The White Hart",
+        1.0,
+        address="126 Godstow Rd, Wolvercote, Oxford OX2 8PQ",
+        coordinates=(51.78375877395617, -1.2931032023798597),
+    ),
+    Pub(
+        "The Plough",
+        1.0,
+        address="The Green, Upper, Wolvercote, Oxford OX2 8BD",
+        coordinates=(51.78368455718229, -1.2825980689375713),
+    ),
+    Pub(
+        "The Victoria Arms",
+        1.0,
+        address="Mill Ln, Marston, Oxford OX3 0QA",
+        coordinates=(51.776811881140894, -1.247328995607249),
+    ),
+    Pub(
+        "The White Hart Headington",
+        1.0,
+        address="12 St Andrew's Rd, Headington, Oxford OX3 9DL",
+        coordinates=(51.764451407904005, -1.2119467485058273),
+    ),
+    Pub(
+        "The Black Boy",
+        1.0,
+        address="91 Old High St, Headington, Oxford OX3 9HT",
+        coordinates=(51.764310567047765, -1.2107340766159935),
+    ),
+    Pub(
+        "The Britannia Inn",
+        1.0,
+        address="1 Lime Walk, London Rd, Headington, Oxford OX3 7AA",
+        coordinates=(51.759175666720274, -1.214274420927072),
+    ),
+    Pub(
+        "The Butcher's Arms",
+        1.0,
+        address="5 Wilberforce St, Headington, Oxford OX3 7AN",
+        coordinates=(51.755919378081195, -1.211098281903228),
+    ),
+    Pub(
+        "The Prince of Wales Horspath",
+        1.0,
+        address="Horspath Rd, Oxford OX4 2QW",
+        coordinates=(51.73821948440574, -1.2017279479073777),
+    ),
+    Pub(
+        "The Original Swan",
+        1.0,
+        address="Oxford Rd, Cowley OX4 2LF",
+        coordinates=(51.73429855750005, -1.2120660649300041),
+    ),
+    Pub(
+        "The Cricketers Arms",
+        1.0,
+        address="102 Temple Rd, Oxford OX4 2EZ",
+        coordinates=(51.7356141709005, -1.2120874105993258),
+    ),
+    Pub(
+        "The Marsh Harrier",
+        1.0,
+        address="40 Marsh Rd, Oxford OX4 2HH",
+        coordinates=(51.73851924680815, -1.2178248065326733),
+    ),
+    Pub(
+        "The Jolly Postboys",
+        1.0,
+        address="22 Florence Park Rd, Oxford OX4 3PH",
+        coordinates=(51.73358927666662, -1.2253135887579476),
+    ),
+    Pub(
+        "The Prince of Wales Iffley",
+        1.0,
+        address="73 Church Way, Iffley, Oxford OX4 4EF",
+        coordinates=(51.73019421554414, -1.2372062813347746),
+    ),
+    Pub(
+        "The Isis Farmhouse",
+        1.0,
+        address="Haystacks Corner, The Towing Path, Iffley, Iffley Lock, Oxford OX4 4EL",
+        coordinates=(51.73098601582325, -1.2411871065483797),
+    ),
+    Pub(
+        "The Duke of Monmouth",
+        1.0,
+        address="260 Abingdon Rd, Oxford OX1 4TA",
+        coordinates=(51.737362644967206, -1.251842876423273),
+    ),
+    Pub(
+        "The White House by Tap Social",
+        1.0,
+        address="38 Abingdon Rd, Oxford OX1 4PD",
+        coordinates=(51.74373913447091, -1.2559136115233211),
+    ),
+    Pub(
+        "Cherwell Boathouse",
+        1.0,
+        address="Bardwell Rd, Oxford OX2 6ST",
+        coordinates=(51.769523309974524, -1.253724930849054),
+        cheapest_pint=6.89,
+    ),
+    Pub(
+        "The Vine Inn",
+        1.0,
+        address="11 Abingdon Rd, Cumnor, Oxford OX2 9QN",
+        coordinates=(51.733553231609456, -1.3316437550810705),
+    ),
+    Pub(
+        "The Bear & Ragged Staff",
+        1.0,
+        address="28 Appleton Rd, Cumnor, Oxford OX2 9QH",
+        coordinates=(51.733285567855525, -1.3365688720967883),
+    ),
+    Pub(
+        "The Masons Arms",
+        1.0,
+        address="2 Quarry School Pl, Headington, Oxford OX3 8LH",
+        coordinates=(51.7583042166622, -1.1973381803227674),
+    ),
+    Pub(
+        "The Six Bells",
+        1.0,
+        address="3 Beaumont Rd, Headington, Oxford OX3 8JN",
+        coordinates=(51.759444209242325, -1.1958511806867296),
+    ),
+    Pub(
+        "The Ampleforth Arms",
+        1.0,
+        address="53 Collinwood Rd, Headington, Oxford OX3 8HH",
+        coordinates=(51.75984946832872, -1.1903381692763928),
     ),
 ]
 

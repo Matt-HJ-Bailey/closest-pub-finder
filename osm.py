@@ -52,8 +52,6 @@ def read_osm(filename_or_stream, only_roads=True):
         ).km  # Give a realistic distance estimation (neither EPSG nor projection nor reference system are specified)
 
         G.edges[u, v]["length"] = distance
-
-    # For the exercise we do not want the graph to be directed
     return nx.Graph(G)
 
 

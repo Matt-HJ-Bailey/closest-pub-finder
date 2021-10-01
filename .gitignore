@@ -2,3 +2,4 @@
 *.gpickle
 *.pkl
 __pycache__
+locations.csv
