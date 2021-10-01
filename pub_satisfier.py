@@ -3,12 +3,11 @@ import logging
 import pickle as pkl
 import sys
 from collections import defaultdict
-from typing import Callable, Dict, List, Tuple, Iterable, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 import matplotlib as mpl
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-
 import networkx as nx
 import numpy as np
 from geopy.distance import geodesic
@@ -29,9 +28,7 @@ Coordinate = Tuple[float, float]
 _closest_node_cache: Dict[Coordinate, int] = {}
 
 
-def find_closest_node(
-    current_pos: Coordinate, positions: Dict[int, Coordinate]
-) -> int:
+def find_closest_node(current_pos: Coordinate, positions: Dict[int, Coordinate]) -> int:
     """
     Find the closest node to the specified lat, lon pair.
 
@@ -66,7 +63,7 @@ def find_closest_node(
 def load_graph(filename: str) -> nx.Graph:
     """
     Try loading the graph, either from the gpickle or the file.
-    
+
     If the pickle exists, read the graph from that.
     If not, use read_osm to read it.
     Trim out unconnected components and slightly tidy up the graph before returning.
@@ -101,7 +98,7 @@ def find_all_closest_nodes(
         A dict keyed by node id containing node lat, lon pairs
     regenerate
         if True, reload the whole collection. if not, use a pickle.
-        
+
     Returns
     -------
         A dict mapping pub names to the closest graph node
@@ -138,10 +135,12 @@ def find_all_closest_nodes(
     return closest_nodes
 
 
-def plot_pub_map(graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] =None) -> mpl.axes.Axes:
+def plot_pub_map(
+    graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] = None
+) -> mpl.axes.Axes:
     """
     Plot the provided graph as a map, highlighting pub locations.
-    
+
     Parameters
     ----------
     graph
@@ -150,7 +149,7 @@ def plot_pub_map(graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] =
         A list of pubs to highlight
     ax
         The axis to plot onto, will generate a new one if not provided
-    
+
     Returns
     -------
         an axis with a map drawn on it.
@@ -182,10 +181,14 @@ def plot_pub_map(graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] =
     return ax
 
 
-def plot_highlighted_paths(graph: nx.Graph, path_lists: List[List[Tuple[int, int]]], ax: Optional[mpl.axes.Axes] =None) -> mpl.axes.Axes:
+def plot_highlighted_paths(
+    graph: nx.Graph,
+    path_lists: List[List[Tuple[int, int]]],
+    ax: Optional[mpl.axes.Axes] = None,
+) -> mpl.axes.Axes:
     """
     Highlight certain paths on the map.
-    
+
     Parameters
     ----------
     graph
@@ -232,7 +235,7 @@ def sort_coordinates_anticlockwise(coordinates: np.ndarray) -> np.ndarray:
     ----------
     coordinates
         Vertex coordinates of a polygon
-        
+
     Returns
     -------
         Coordinates sorted in anticlockwise order
@@ -244,10 +247,12 @@ def sort_coordinates_anticlockwise(coordinates: np.ndarray) -> np.ndarray:
     return coordinates[np.argsort(angles)]
 
 
-def plot_pub_voronoi(pubs: List[Pub], ax: Optional[mpl.axes.Axes] =None, with_labels: bool = True) -> mpl.axes.Axes:
+def plot_pub_voronoi(
+    pubs: List[Pub], ax: Optional[mpl.axes.Axes] = None, with_labels: bool = True
+) -> mpl.axes.Axes:
     """
     Plot a voronoi diagram of pubs.
-    
+
     Will fill in polygons at infinity and do a minimal colouring.
     Parameters
     ----------
@@ -257,7 +262,7 @@ def plot_pub_voronoi(pubs: List[Pub], ax: Optional[mpl.axes.Axes] =None, with_la
         The axis to plot onto
     with_labels
         Should we plot the names of pubs?
-    
+
     Returns
     -------
         An axis with a voronoi diagram on it
@@ -353,21 +358,23 @@ def plot_pub_voronoi(pubs: List[Pub], ax: Optional[mpl.axes.Axes] =None, with_la
     return ax
 
 
-def find_satisfied_constraints(pubs: List[Pub], constraints: Tuple[str, Callable]) -> List[Pub]:
+def find_satisfied_constraints(
+    pubs: List[Pub], constraints: Tuple[str, Callable]
+) -> List[Pub]:
     """
     Find which pub satisfy a list of constraints.
 
     Provide the constraints as a list of (attr, predicate) tuples
     where the attribute is something we can look up in a pub
     as getattr(pub, attr), and the predicate operates on that.
-    
+
     Parameters
     ----------
     pubs
         A list of pubs with various attributes
     constraints
         A list of (attribute, callable) pairs, where each pub must have each attribute and callable operates on that.
-        
+
     Returns
     -------
         Pubs where all constraints are met.
