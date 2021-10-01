@@ -341,7 +341,9 @@ def main():
     print("-------------------------------------⊤------⊤------⊤------⊣")
     print("       Name                          | Dist.| Pint |Chance|")
     print("-------------------------------------+------+------+------⊣")
-    for pub_id in range(len(valid_pubs)):
+
+    weight_order = np.argsort(-weights)
+    for pub_id in weight_order[: min(5, len(valid_pubs))]:
         print(
             f"{valid_pubs[pub_id].name:36} | {valid_pubs[pub_id].distance:4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
         )
