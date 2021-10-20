@@ -38,7 +38,7 @@ class Pub:
             self.__setattr__(key, val)
 
     def __repr__(self):
-        return ", ".join(value for attr, value in self.__dict__.iteritems())
+        return ", ".join(str(value) for attr, value in self.__dict__.items())
 
 
 PUBS = [
@@ -241,7 +241,7 @@ PUBS = [
         0.9,
         address="The Royal Oak, 42-44, Woodstock Road, Norham Manor, Oxford, Oxfordshire, South East, England, OX2 6HT, United Kingdom ",
         coordinates=(51.7606495, -1.2616332397836085),
-        cheapest_pint=4.5,
+        cheapest_pint=4.2,
     ),
     Pub(
         "The Victoria",

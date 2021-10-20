@@ -1,15 +1,24 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Script to decide which pub to go to.
+
+Created on 2021
+
+@author: Matt Bailey
+"""
+
 import argparse
 import logging
 import os
-import pickle as pkl
 from collections import defaultdict
-from typing import Callable, Dict, Iterable, List, Tuple
+from typing import Callable, Dict, Iterable, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-from geopy.distance import geodesic
+from scipy.spatial import KDTree
 
 from osm import read_osm
 from pub_data import PUBS, Pub
@@ -21,9 +30,57 @@ PERSON_VETOS["Max"] = {
     "The Lamb and Flag",
 }
 PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan"}
+# PERSON_VETOS["Tristan"] = {"The Kings Arms"}
 
 Coordinate = Tuple[float, float]
 _closest_node_cache: Dict[Coordinate, int] = {}
+
+_CACHED_HELPER = None
+
+
+class ClosestHelper:
+    """Helper class that automates some of the KD-tree bookkeeping."""
+
+    def __init__(self, positions: Dict[int, Coordinate]):
+        """
+        Set up the KD-tree for future usage.
+
+        Parameters
+        ----------
+        positions
+            Positions of every node in the graph, as a dict.
+        """
+        positions_arr = np.empty([len(positions), 2])
+        self._idx_label = {}
+        for idx, (label, pos) in enumerate(positions.items()):
+            self._idx_label[idx] = label
+            positions_arr[idx, :] = pos
+
+        self._tree = KDTree(positions_arr)
+
+    def query(
+        self, coordinates: Union[Coordinate, Iterable[Coordinate]]
+    ) -> Union[int, List[int]]:
+        """
+        Find the node index closest to these coordinates.
+
+        Returns just one node index for a single coordinate, or an array
+        for an array for coordinates.
+
+        Parameters
+        ----------
+        coordinates
+            Either one or many lat, lon coordinates
+
+        Returns
+        -------
+            labels of the closest nodes in the graph
+        """
+        dists, neighbours = self._tree.query(coordinates)
+        if isinstance(neighbours, np.int64):
+            # We've just got one
+            return self._idx_label[neighbours]
+        return [self._idx_label[neighbour] for neighbour in neighbours]
 
 
 def find_closest_node(current_pos: Coordinate, positions: Dict[int, Coordinate]) -> int:
@@ -42,20 +99,13 @@ def find_closest_node(current_pos: Coordinate, positions: Dict[int, Coordinate])
     -------
         a node id of the closest graph node to this position
     """
-    current_distance = np.inf
-    node_index = None
-    # If this is cached, return the cached value
-    if current_pos in _closest_node_cache:
-        return _closest_node_cache[current_pos]
-    for key, val in positions.items():
-        distance = geodesic(current_pos, val)
-        if distance < current_distance:
-            current_distance = distance
-            node_index = key
+    global _CACHED_HELPER
+    if _CACHED_HELPER is None:
+        _CACHED_HELPER = ClosestHelper(positions)
 
-    # Return the cached value
-    _closest_node_cache[current_pos] = node_index
-    return node_index
+    kdtree_helper = _CACHED_HELPER
+    neighbour = kdtree_helper.query(current_pos)
+    return neighbour
 
 
 def load_graph(filename: str) -> nx.Graph:
@@ -94,42 +144,21 @@ def find_all_closest_nodes(
         a list of pubs that have coordinates
     positions
         A dict keyed by node id containing node lat, lon pairs
-    regenerate
-        if True, reload the whole collection. if not, use a pickle.
 
     Returns
     -------
         A dict mapping pub names to the closest graph node
     """
-    closest_nodes = dict()
-    try:
-        if not regenerate:
-            logging.info("Loading closest nodes from pickle")
-            with open("all-closest-nodes.pkl", "rb") as fi:
-                loaded_dict = pkl.load(fi)
-            rewrite_pickle = False
-            for pub in pubs:
-                if pub.name not in loaded_dict:
-                    logging.info(f"{pub.name} not in pickle, finding closest.")
-                    rewrite_pickle = True
-                    loaded_dict[pub.name] = find_closest_node(
-                        pub.coordinates, positions
-                    )
-            if rewrite_pickle:
-                with open("all-closest-nodes.pkl", "wb") as fi:
-                    pkl.dump(loaded_dict, fi)
-            return loaded_dict
-    except FileNotFoundError:
-        logging.warn("Could not find all-closest-nodes.pkl")
-    except TypeError as e:
-        logging.warn(str(e))
+    closest_nodes = {}
+    global _CACHED_HELPER
+    if regenerate or _CACHED_HELPER is None:
+        _CACHED_HELPER = ClosestHelper(positions)
+    kdtree_helper = _CACHED_HELPER
+    pub_positions = np.array([pub.coordinates for pub in pubs])
+    neighbours = kdtree_helper.query(pub_positions)
 
-    for pub in pubs:
-        logging.info("Finding closest", pub.name)
-        closest_node = find_closest_node(pub.coordinates, positions)
-        closest_nodes[pub.name] = closest_node
-    with open("all-closest-nodes.pkl", "wb") as fi:
-        pkl.dump(closest_nodes, fi)
+    for idx, pub in enumerate(pubs):
+        closest_nodes[pub.name] = neighbours[idx]
     return closest_nodes
 
 
@@ -191,7 +220,6 @@ def populate_distances(
     """
     positions = nx.get_node_attributes(graph, "pos")
     closest_nodes = find_all_closest_nodes(pubs, positions)
-    # print(f"Populating distances, {len(pubs)}, {len(person_locations)}")
     _distance_cache: Dict[Tuple[str, Coordinate], float] = {}
     for pub in pubs:
         distance = 0.0
@@ -251,7 +279,6 @@ def argsort_preserve_ties(values: np.ndarray) -> np.ndarray:
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Decide which pub to go to.")
     parser.add_argument(
         "pubgoers",

@@ -61,7 +61,8 @@ The ranking is printed and a best pub is randomly chosen.
 
 ## Caching
 
-Finding the closest graph nodes corresponding to real coordinates is extremely slow for large maps, so this program will two pickle files. The first is `all-closest-nodes.pkl` which marks the graph nodes corresponding to the unique names of pubs. The second is `map.osm.pkl` which is a `gpickle` of the loaded map to save double processing.
+Finding the closest graph nodes corresponding to real coordinates is extremely slow for large maps, so this program will generate one pickle file. This is `map.osm.pkl` which is a `gpickle` of the loaded map to save double processing.
+The real coordinates of the pubs are snapped to the graph by using a KDTree, which finds the closest node to each part of the graph. This KDTree is cached, and can be slow to build for large graphs.
 
 ## Pub Drawing
 
