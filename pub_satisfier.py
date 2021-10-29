@@ -11,6 +11,7 @@ Created on 2021
 import argparse
 import logging
 import os
+import sys
 from collections import defaultdict
 from typing import Callable, Dict, Iterable, List, Tuple, Union
 
@@ -23,6 +24,9 @@ from scipy.spatial import KDTree
 from osm import read_osm
 from pub_data import PUBS, Pub
 from pub_drawing import plot_highlighted_paths, plot_pub_map, plot_pub_voronoi
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+logger = logging.getLogger()
 
 PTCL_LOCATION = (-1.2535525, 51.7593620)
 PERSON_VETOS = defaultdict(set)
@@ -76,7 +80,7 @@ class ClosestHelper:
         -------
             labels of the closest nodes in the graph
         """
-        dists, neighbours = self._tree.query(coordinates)
+        _, neighbours = self._tree.query(coordinates)
         if isinstance(neighbours, np.int64):
             # We've just got one
             return self._idx_label[neighbours]
@@ -309,9 +313,10 @@ def main():
 
     if os.path.exists("./locations.csv"):
         person_df = pd.read_csv("./locations.csv")
-        for row in person_df.iterrows:
-            person_locations[row["name"]] = (row["lat"], row["lon"])
+        for idx, row in person_df.iterrows():
+            person_locations[row["name"]] = (row["lon"], row["lat"])
 
+    logger.info("Loading OpenStreetMap graph...")
     nx_graph = load_graph("map.osm")
 
     positions = {
@@ -320,10 +325,12 @@ def main():
     }
     nx.set_node_attributes(nx_graph, positions, name="pos")
     pubs = [pub for pub in PUBS if pub.is_open]
+    logging.info("Calculating distances...")
     pubs = populate_distances(pubs, pubgoers, person_locations, nx_graph)
 
     pub_vetos = set(name for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
 
+    logging.info("Satisfying constraints...")
     valid_pubs = find_satisfied_constraints(
         pubs,
         [
@@ -349,10 +356,10 @@ def main():
         )
     elif len(valid_pubs) == 1:
         print(f"We are left with one pubs. It is {valid_pubs[0]}")
-        exit()
+        sys.exit()
     else:
         print("We are left with zero valid pubs. We are having tinnies in the office.")
-        exit()
+        sys.exit()
 
     if args.martin:
         price_weights = argsort_preserve_ties(
@@ -377,12 +384,13 @@ def main():
     print("-------------------------------------⊥------⊥------⊥------⊣")
 
     rng = np.random.default_rng()
-    random_idx = rng.choice([idx for idx in range(len(valid_pubs))], p=weights)
+    random_idx = rng.choice(list(range(len(valid_pubs))), p=weights)
     random_pub = valid_pubs[random_idx]
     print(
         f"I have randomly chosen {random_pub.name} with probability {weights[random_idx]*100:.1f}%"
     )
 
+    logging.info("Plotting shortest paths...")
     paths_highlight = []
     for pubgoer in pubgoers:
         person_node = find_closest_node(person_locations[pubgoer], positions)
@@ -396,8 +404,8 @@ def main():
                 for node in range(len(choice_path) - 1)
             ]
         )
-
-    fig, ax = plt.subplots()
+    logging.info("Visualsing pub map...")
+    _, ax = plt.subplots()
     ax = plot_pub_map(nx_graph, pubs, ax=ax)
     ax = plot_pub_voronoi(pubs, ax=ax, with_labels=True)
     ax = plot_highlighted_paths(nx_graph, paths_highlight, ax=ax)

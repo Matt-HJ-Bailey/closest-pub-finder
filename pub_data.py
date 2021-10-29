@@ -59,12 +59,14 @@ PUBS = [
         1.0,
         address="The Chequers, 131 High Street, Oxford, Oxfordshire, South East, England, OX1 4DH, United Kingdom",
         coordinates=(51.752061, -1.256685),
+        cheapest_pint=4.15,
     ),
     Pub(
         "The Crown",
         1.1,
         address="The Crown, 59a, Cornmarket Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 3HB, United Kingdom",
         coordinates=(51.7521883, -1.2580222),
+        cheapest_pint=4.15,
     ),
     Pub(
         "The Eagle and Child",
@@ -128,6 +130,14 @@ PUBS = [
         has_beer=False,
         address="O'Neill's, George Street, Grandpont, Oxford, Oxfordshire, South East, England, OX1 2BJ, United Kingdom",
         coordinates=(51.7535341, -1.2607996),
+    ),
+    Pub(
+        "Wig & Pen",
+        1.0,
+        has_beer=True,
+        address="9-13 George St, Oxford OX1 2AU",
+        coordinates=(51.75368045158259, -1.2597503187656156),
+        cheapest_pint=3.95,
     ),
     Pub(
         "The Oxford Retreat",
@@ -229,6 +239,7 @@ PUBS = [
         1.2,
         address="Jude the Obscure, 51-54, Walton Street, Jericho, Oxford, Oxfordshire, South East, England, OX2 6AE, United Kingdom ",
         coordinates=(51.7599843, -1.26628205555838),
+        cheapest_pint=4.10,
     ),
     Pub(
         "The Rickety Press",
@@ -613,6 +624,13 @@ PUBS = [
         1.0,
         address="53 Collinwood Rd, Headington, Oxford OX3 8HH",
         coordinates=(51.75984946832872, -1.1903381692763928),
+    ),
+    Pub(
+        "The Dewdrop",
+        1.0,
+        address="Dewdrop, Banbury Road, Summertown, Oxford",
+        coordinates=(51.77757769540642, -1.2647565307058308),
+        cheapest_pint=4.0,
     ),
 ]
 
