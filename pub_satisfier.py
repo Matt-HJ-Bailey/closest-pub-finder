@@ -22,7 +22,7 @@ import pandas as pd
 from scipy.spatial import KDTree
 
 from osm import read_osm
-from pub_data import PUBS, Pub
+from pub_data import Pub, import_pubs
 from pub_drawing import plot_highlighted_paths, plot_pub_map, plot_pub_voronoi
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -33,8 +33,8 @@ PERSON_VETOS = defaultdict(set)
 PERSON_VETOS["Max"] = {
     "The Lamb and Flag",
 }
-PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan"}
-# PERSON_VETOS["Tristan"] = {"The Kings Arms"}
+PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan", "The Wig and Pen"}
+PERSON_VETOS["Tristan"] = {"The Kings Arms"}
 
 Coordinate = Tuple[float, float]
 _closest_node_cache: Dict[Coordinate, int] = {}
@@ -124,10 +124,11 @@ def load_graph(filename: str) -> nx.Graph:
     filename
         The name of the file to read from.
     """
-    try:
+
+    if os.path.exists(filename + ".pkl"):
         nx_graph = nx.read_gpickle(filename + ".pkl")
         logging.info("Loading graph from pickle")
-    except FileNotFoundError:
+    else:
         nx_graph = read_osm(filename)
         nx.write_gpickle(nx_graph, filename + ".pkl")
 
@@ -299,10 +300,27 @@ def main():
         "--distance", default=1.0, type=float, help="Maximum average distance to travel"
     )
     parser.add_argument(
+        "--print", default=5, type=int, help="How many pubs to print in the table"
+    )
+    parser.add_argument(
         "--temperature",
         default=1.0,
         type=float,
         help="Monte Carlo temperature for deciding on which pub. Higher temperature means less optimal choices.",
+    )
+    
+    parser.add_argument(
+        "--datafile",
+        default="./oxford-pub-data.csv",
+        type=str,
+        help="Name of the file containing the pub data"
+    )
+    
+    parser.add_argument(
+        "--mapfile",
+        default="oxford.osm",
+        type=str,
+        help="Name of the OpenStreetMap file"
     )
     args = parser.parse_args()
 
@@ -317,19 +335,20 @@ def main():
             person_locations[row["name"]] = (row["lon"], row["lat"])
 
     logger.info("Loading OpenStreetMap graph...")
-    nx_graph = load_graph("map.osm")
+    nx_graph = load_graph(args.mapfile)
 
     positions = {
         node: np.array([nx_graph.nodes[node]["lon"], nx_graph.nodes[node]["lat"]])
         for node in nx_graph.nodes
     }
     nx.set_node_attributes(nx_graph, positions, name="pos")
-    pubs = [pub for pub in PUBS if pub.is_open]
+ 
+    pubs = [pub for pub in import_pubs(args.datafile) if pub.is_open]
     logging.info("Calculating distances...")
     pubs = populate_distances(pubs, pubgoers, person_locations, nx_graph)
 
-    pub_vetos = set(name for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
-
+    pub_vetos = set(name.lower().strip() for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
+    print("Veto'd pubs are", pub_vetos)
     logging.info("Satisfying constraints...")
     valid_pubs = find_satisfied_constraints(
         pubs,
@@ -343,7 +362,7 @@ def main():
             ),
             ("has_pub_quiz", lambda has_pub_quiz: not has_pub_quiz),
             ("has_live_music", lambda has_live_music: not has_live_music),
-            ("name", lambda name: name not in pub_vetos),
+            ("name", lambda name: name.lower().strip() not in pub_vetos),
             ("has_funny_smell", lambda has_funny_smell: not has_funny_smell),
             ("is_college", lambda is_college: not is_college),
         ],
@@ -377,9 +396,9 @@ def main():
     print("-------------------------------------+------+------+------⊣")
 
     weight_order = np.argsort(-weights)
-    for pub_id in weight_order[: min(5, len(valid_pubs))]:
+    for pub_id in weight_order[: min(args.print, len(valid_pubs))]:
         print(
-            f"{valid_pubs[pub_id].name:36} | {valid_pubs[pub_id].distance:4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
+            f"{valid_pubs[pub_id].name:36} | {valid_pubs[pub_id].distance/len(pubgoers):4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
         )
     print("-------------------------------------⊥------⊥------⊥------⊣")
 
