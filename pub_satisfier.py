@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
-STANDARD_LOCATION = (-1.2664722821594505,51.760319078103194)
 PTCL_LOCATION = (-1.2534844873736306, 51.7590386380762)
 PERSON_VETOS = defaultdict(set)
 PERSON_VETOS["Max"] = {
@@ -320,6 +319,13 @@ def main():
     )
     
     parser.add_argument(
+        "--colleges",
+        default=False,
+        type=bool,
+        help="Should we include colleges?"
+    )
+      
+    parser.add_argument(
         "--mapfile",
         default="oxford.osm",
         type=str,
@@ -347,13 +353,18 @@ def main():
     pubgoers = args.pubgoers
 
     person_locations = defaultdict(lambda: PTCL_LOCATION)
-    home_locations = defaultdict(lambda: STANDARD_LOCATION)
+    home_locations = defaultdict(lambda: PTCL_LOCATION)
 
     if os.path.exists("./locations.csv"):
         person_df = pd.read_csv("./locations.csv")
         for idx, row in person_df.iterrows():
-            person_locations[row["name"]] = (row["lon"], row["lat"])
+            person_locations[row["name"]] = (row["lat"], row["lon"])
 
+    if os.path.exists("./home-locations.csv"):
+        home_df = pd.read_csv("./home-locations.csv")
+        for idx, row in home_df.iterrows():
+            home_locations[row["name"]] = (row["lat"], row["lon"])
+            
     logger.info("Loading OpenStreetMap graph...")
     nx_graph = load_graph(args.mapfile)
 
@@ -363,12 +374,15 @@ def main():
     }
     nx.set_node_attributes(nx_graph, positions, name="pos")
  
-    pubs = [pub for pub in import_pubs(args.datafile) if pub.is_open]
+    if args.colleges:
+        pubs = [pub for pub in import_pubs(args.datafile) if pub.is_open]
+    else:
+        pubs = [pub for pub in import_pubs(args.datafile) if pub.is_open and not pub.is_college]
     logger.info("Calculating distances...")
     pubs = populate_distances(pubs, pubgoers, person_locations, home_locations, nx_graph)
 
     pub_vetos = set(name.lower().strip() for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
-    print("Veto'd pubs are", pub_vetos)
+    logger.info("Veto'd pubs are" + ",".join(pub_vetos))
     logger.info("Satisfying constraints...")
     valid_pubs = find_satisfied_constraints(
         pubs,
@@ -451,6 +465,7 @@ def main():
                 for node in range(len(choice_path) - 1)
             ]
         )
+
         paths_highlight.append(
             [
                 (home_path[node], home_path[node + 1])
