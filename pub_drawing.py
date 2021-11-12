@@ -36,6 +36,7 @@ def plot_highlighted_paths(
     graph: nx.Graph,
     path_lists: List[List[Tuple[int, int]]],
     ax: Optional[mpl.axes.Axes] = None,
+    styles=None
 ) -> mpl.axes.Axes:
     """
     Highlight certain paths on the map.
@@ -52,6 +53,7 @@ def plot_highlighted_paths(
     -------
         An axis with highlighted paths on it, each uniquely coloured.
     """
+
     if ax is None:
         logging.info("Plotting new fig")
         _, ax = plt.subplots()
@@ -64,6 +66,12 @@ def plot_highlighted_paths(
         else:
             unique_path_lists.append(path_list)
             seen.add(frozenset(path_list))
+    
+    if styles is None:
+        styles = ["solid" for _ in range(len(unique_path_lists))]
+        
+    if isinstance(styles, str):
+        styles = [styles for _ in range(len(unique_path_lists))]
     highlight_cmap = cm.get_cmap("gist_rainbow", lut=len(unique_path_lists))
     for idx, path_list in enumerate(unique_path_lists):
 
@@ -73,6 +81,7 @@ def plot_highlighted_paths(
             ax=ax,
             edgelist=path_list,
             edge_color=highlight_cmap(idx),
+            style=styles[idx],
             width=2.0,
         )
     return graph
@@ -190,7 +199,7 @@ def plot_pub_voronoi(
 
 
 def plot_pub_map(
-    graph: nx.Graph, pubs: List[Pub], ax: Optional[mpl.axes.Axes] = None
+    graph: nx.Graph, pubs: List[Pub], with_labels=False, ax: Optional[mpl.axes.Axes] = None
 ) -> mpl.axes.Axes:
     """
     Plot the provided graph as a map, highlighting pub locations.
@@ -226,6 +235,23 @@ def plot_pub_map(
         s=25,
         c="blue",
     )
+    
+    if with_labels:
+        for pub in pubs:
+            text = ax.text(
+                pub.coordinates[0],
+                pub.coordinates[1],
+                pub.name,
+                horizontalalignment="center",
+                color="white",
+                fontsize="x-small",
+            )
+            text.set_path_effects(
+                [
+                    path_effects.Stroke(linewidth=1, foreground="black"),
+                    path_effects.Normal(),
+                ]
+            )
     width = max_x - min_x
     height = max_y - min_y
     ax.set_xlim(min_x - 0.01 * width, 0.01 * width + max_x)
