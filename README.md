@@ -11,26 +11,31 @@ The arguments are
 * --distance the maximum distance pubgoers are willing to travel
 * --temperature a temperature factor for the random choice, a higher T will cause a less optimal pub to be picked.
 * --martin Is someone else paying? In which case, invert the price ordering.
-* list of pubgoers  A list of the people going to the pub
+* --college Should we include college bars?
+* list of pubgoers  A list of the people going to the pub. These are space separated so if you want to distinguish people by first and last names then enter it as "Jane Smith"
 
 This program also requires a file called `map.osm` containing OpenStreetMap data. You can get this from OpenStreetMap exporter: [https://www.openstreetmap.org/export#map=13/51.7465/-1.2234](https://www.openstreetmap.org/export#map=13/51.7/-1.2).
-It also requires a file called `locations.csv` which will contain rows of `name, lat, lon`. This will be used if you're not all travelling from the default location.
+Optionally you can provide two files `locations.csv` and `home-locations.csv` which will contain rows of `name, lat, lon`. This will be used to provide where each person comes from (`locations.csv`) and where they will go after leaving the pub (`home-locations.csv`).
+If blank, these assume that people go to and from the Physical and Theoretical Chemistry laboratory.
+
 
 ## Requirements
 
 This relies on
 * matplotlib
-* networkx
+* networkx>=2.6
 * numpy
 * geopy
 * scipy
 * xml
 
+The pub crawl planner relies on a newer version of networkx that didn't install by default from conda for me.
+You may have to install it manually.
 
 ## Pub Data
 
 
-The file `pub_data.py` contains objects that detail every pub in Oxford with a variety of attributes -- whether they are open, their address, the cheapest pint as of 2021, etc. Most importantly this describes latitude and longitude coordinates for every pub, which will help with navigation.
+The file `pub_data.csv` contains objects that detail every pub in Oxford with a variety of attributes -- whether they are open, their address, the cheapest pint as of 2021, etc. Most importantly this describes latitude and longitude coordinates for every pub, which will help with navigation.
 
 Current a pub has the following attributes:
 | attribute       | Description                                                                            |

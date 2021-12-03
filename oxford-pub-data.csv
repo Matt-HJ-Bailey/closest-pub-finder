@@ -1,0 +1,99 @@
+name, distance, has_beer, has_pub_quiz, is_spoons, has_live_music, address, lat, lon, has_funny_smell, cheapest_pint, is_open, is_college
+The Bear Inn,1.1, True, False, False, False, The Bear; 6; Alfred Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 4EH; United Kingdom,51.7515434014742,-1.2556187796439, False, inf, True, False
+The Royal Blenheim,1.3, True, False, False, False, Royal Blenheim; 13; St Ebbes Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1PT; United Kingdom,51.7507949,-1.2593275, False, inf, True, False
+The Chequers,1, True, False, False, False, The Chequers; 131 High Street; Oxford; Oxfordshire; South East; England; OX1 4DH; United Kingdom,51.752061,-1.256685, False,4.15, True, False
+The Crown,1.1, True, False, False, False, The Crown; 59a; Cornmarket Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 3HB; United Kingdom,51.7521883,-1.2580222, False,4.15, True, False
+The Eagle and Child,0.65, True, False, False, False, Eagle and Child; 49; St Giles'; Norham Manor; Oxford; Oxfordshire; South East; England; OX1 3LU; United Kingdom,51.7572211,-1.26032841088588, True, inf, False, False
+The Four Candles,1.1, True, False, True, False, The Four Candles; 51-53; George Street; Jericho; Oxford; Oxfordshire; South East; England; OX1 2BE; United Kingdom,51.7533993,-1.2620909, False, inf, True, False
+The Grapes,1, True, False, False, False, The Grapes; 7; George Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 2AT; United Kingdom,51.7537486,-1.2595821, False,4.1, True, False
+The Head of the River,1.7, True, False, False, False, The Head of the River; 1; Folly Bridge; Grandpont; Oxford; Oxfordshire; South East; England; OX1 4LB; United Kingdom,51.7466878,-1.25603234128041, False, inf, True, False
+The Kings Arms,0.6, True, False, False, False, King's Arms; 40; Holywell Street; Norham Manor; Oxford; Oxfordshire; South East; England; OX1 3SP; United Kingdom,51.7550797,-1.2543214, False,4.8, True, False
+The Lamb and Flag,0.55, True, False, False, False, Lamb and Flag; St Giles'; Norham Manor; Oxford; Oxfordshire; South East; England; OX1 3JS; United Kingdom,51.7574047,-1.25931049241832, True, inf, False, False
+The Mitre,1, True, False, False, False, The Mitre; High Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 4AQ; United Kingdom,51.7523948,-1.25597979281206, False, inf, False, False
+The Old Tom,1.2, True, False, False, False, Old Tom; 101; St Aldate's; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1BT; United Kingdom,51.7508746,-1.2572208, False, inf, True, False
+O'Neills,1, False, False, False, False, O'Neill's; George Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 2BJ; United Kingdom,51.7535341,-1.2607996, False, inf, True, False
+The Wig and Pen,1, True, False, False, False, 9-13 George St; Oxford OX1 2AU,51.7536804515826,-1.25975031876562, False,3.95, True, False
+The Oxford Retreat,1.4, True, False, False, False, The Oxford Retreat; 1-2; Hythe Bridge Street; Jericho; Oxford; Oxfordshire; South East; England; OX1 2TA; United Kingdom ,51.7532923,-1.2656159, False, inf, True, False
+The Red Lion,1.1, True, False, False, False, The Red Lion; 40-42; Oxford Road; Old Marston; Oxford; Oxfordshire; South East; England; OX3 0PH; United Kingdom ,51.7723282838128,-1.23624036775454, False, inf, True, False
+The St Aldate's Tavern,1.2, True, False, False, False, St Aldate's Tavern; 108; St Aldate's; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1BU; United Kingdom ,51.75129325,-1.25741149661418, False, inf, True, False
+The Three Goats Heads,1, True, False, False, False, Three Goats Heads; 3A; St Michael's Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 2DR; United Kingdom ,51.7534232,-1.2590829, False,4.5, True, False
+The Turf Tavern,0.5, True, False, False, False,   Turf Tavern; 7; Bath Place; Grandpont; Oxford; Oxfordshire; South East; England; OX1 3SU; United Kingdom ,51.7546944,-1.25286223202216, False,4.4, True, False
+The Wheatsheaf,1, True, False, False, False, The Wheatsheaf; 129; High Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 4DF; United Kingdom ,51.75174,-1.256298, False, inf, True, False
+White Horse,0.65, True, False, False, False, White Horse; 52; Broad Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 3BB; United Kingdom,51.7545992,-1.2556516, False, inf, True, False
+The White Rabbit,0.65, True, False, False, False, The White Rabbit; 21; Friars Entry; Jericho; Oxford; Oxfordshire; South East; England; OX1 2BY; United Kingdom ,51.7544715,-1.26070057067708, False, inf, True, False
+The Castle,1.6, True, False, False, False, The Castle; 24; Paradise Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1LD; United Kingdom ,51.7507181,-1.26193265533827, False, inf, True, False
+The Jam Factory,1.6, True, False, False, False, The Jam Factory; Hollybush Row; Jericho; Oxford; Oxfordshire; South East; England; OX1 1HU; United Kingdom ,51.7523455,-1.2677711621899, False, inf, True, False
+The Jolly Farmers,1.5, True, False, False, False, The Jolly Farmers; 20; Paradise Street; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1LD; United Kingdom ,51.75069235,-1.26261420925257, False, inf, True, False
+The Swan and Castle,1.5, True, False, True, False, The Swan and Castle; 40; Castle Street Square; Oxford Castle Quarter; Grandpont; Oxford; Oxfordshire; South East; England; OX1 1AY; United Kingdom ,51.7511807,-1.2618425, False, inf, True, False
+The Old Bookbinders,1.5, True, False, False, False, The Old Bookbinders; 17-18; Victor Street; Jericho; Oxford; Oxfordshire; South East; England; OX2 6BT; United Kingdom ,51.7584939,-1.2697797, False,4.7, True, False
+The Harcourt Arms,1.4, True, True, False, False,   The Harcourt Arms; 1-2; Cranham Terrace; Jericho; Oxford; Oxfordshire; South East; England; OX2 6DG; United Kingdom ,51.75941005,-1.2680248973844, False, inf, True, False
+The Jericho Tavern,1.3, True, False, False, False, Jericho Tavern; 56; Walton Street; Jericho; Oxford; Oxfordshire; South East; England; OX2 6BU; United Kingdom ,51.76017715,-1.26649246959839, False, inf, True, False
+Jude the Obscure,1.2, True, False, False, False, Jude the Obscure; 51-54; Walton Street; Jericho; Oxford; Oxfordshire; South East; England; OX2 6AE; United Kingdom ,51.7599843,-1.26628205555838, False,4.1, True, False
+The Rickety Press,1.4, True, False, False, False, The Rickety Press; 67; Cranham Street; Jericho; Oxford; Oxfordshire; South East; England; OX2 6DS; United Kingdom ,51.7598827,-1.26832443785764, False, inf, True, False
+The Royal Oak,0.9, True, False, False, False, The Royal Oak; 42-44; Woodstock Road; Norham Manor; Oxford; Oxfordshire; South East; England; OX2 6HT; United Kingdom ,51.7606495,-1.26163323978361, False,4.2, True, False
+The Victoria,1.5, True, False, False, False, The Victoria; 90; Walton Street; Jericho; Oxford; Oxfordshire; South East; England; OX2 6EB; United Kingdom ,51.76173755,-1.26786987286096, False, inf, True, False
+The Victoria Arms,2.5, True, False, False, False, Mill Ln; Marston; Oxford OX3 0QA,51.7768474269668,-1.24723058812093, False, inf, False, False
+The Anchor,2, True, False, False, False, The Anchor; 2; Hayfield Road; Walton Manor; Oxford; Oxfordshire; South East; England; OX2 6TT; United Kingdom ,51.7677013,-1.26904809388201, False, inf, True, False
+The Gardener's Arms North Parade,1.2, True, False, False, False, Gardeners Arms; 8; North Parade Avenue; Norham Manor; Oxford; Oxfordshire; South East; England; OX2 6LX; United Kingdom ,51.7644918,-1.2620828, False, inf, True, False
+The Gardener's Arms Plantation Road,1.4, True, False, False, False, The Gardeners Arms; 39; Plantation Road; Walton Manor; Oxford; Oxfordshire; South East; England; OX2 6JE; United Kingdom ,51.76273625,-1.26658669496512, False, inf, True, False
+The Rose and Crown,1.2, True, False, False, False, The Rose And Crown; 14; North Parade Avenue; Norham Manor; Oxford; Oxfordshire; South East; England; OX2 6LX; United Kingdom ,51.7647059,-1.2616289, False, inf, True, False
+The Fishes,3.4, True, False, False, False, The Fishes; North Hinksey Village; North Hinksey; Vale of White Horse; Oxfordshire; South East; England; OX2 0NA; United Kingdom ,51.7452124,-1.2825397, False, inf, True, False
+Tap Social Movement,3.5, True, True, False, False, Tap Social Movement; 27; Southern By-pass Road; North Hinksey; Vale of White Horse; Oxfordshire; South East; England; OX2 0LX; United Kingdom ,51.7512935,-1.295217, False, inf, True, False
+The Angel and Greyhound,1.4, True, False, False, False, Angel and Greyhound; 30; St Clements Street; New Marston; Oxford; Oxfordshire; South East; England; OX4 1AB; United Kingdom ,51.75033915,-1.24264797951253, False, inf, True, False
+The Half Moon,1.3, True, False, False, False, The Half Moon; 17-18; St Clements Street; New Marston; Oxford; Oxfordshire; South East; England; OX4 1AB; United Kingdom ,51.7502867,-1.2434793, False, inf, True, False
+The Old Black Horse,1.4, False, False, False, False, Old Black Horse Inn; 102; St Clements Street; New Marston; Oxford; Oxfordshire; South East; England; OX4 1AR; United Kingdom,51.75001,-1.24279, False, inf, True, False
+The Port Mahon,1.6, True, False, False, False, Port Mahon; 82; St Clements Street; New Marston; Oxford; Oxfordshire; South East; England; OX4 1AW; United Kingdom,51.75042,-1.23997, False, inf, True, False
+The Star,1.8, True, False, False, False,   The Star; 21; Rectory Road; New Marston; Oxford; Oxfordshire; South East; England; OX4 1BU; United Kingdom ,51.7493995,-1.2382685933216, False, inf, True, False
+The Black Swan,2, True, False, False, False, Black Swan; 11; Crown Street; Oxford; Oxfordshire; South East; England; OX4 1QG; United Kingdom ,51.7466865,-1.23698351323529, False, inf, True, False
+The Cape of Good Hope,1.3, True, False, False, False, Cape of Good Hope; 1; Iffley Road; Grandpont; Oxford; Oxfordshire; South East; England; OX4 1EA; United Kingdom ,51.74968525,-1.24379636061248, False, inf, True, False
+The Chester,2.4, True, False, False, False, The Chester; 19; Chester Street; Cold Harbour; Oxford; Oxfordshire; South East; England; OX4 1SN; United Kingdom,51.7416405,-1.2406271, False, inf, True, False
+The City Arms,2.4, False, False, False, False,  he City Arms; 288; Cowley Road; Oxford; Oxfordshire; South East; England; OX4 1UR; United Kingdom ,51.7449353,-1.23011291781438, False, inf, True, False
+The Cowley Retreat,2, True, False, False, False, The Cowley Retreat; 172; Cowley Road; Oxford; Oxfordshire; South East; England; OX4 1UE; United Kingdom ,51.7471918,-1.23555398581653, False, inf, True, False
+BrewDog,1.8, True, False, False, False, Brewdog; 119; Cowley Road; Oxford; Oxfordshire; South East; England; OX4 1JH; United Kingdom ,51.74807735,-1.23716068047158, False, inf, True, False
+The Mad Hatter,1.5, False, False, False, False, The Mad Hatter; 43; Iffley Road; Grandpont; Oxford; Oxfordshire; South East; England; OX4 1EA; United Kingdom ,51.7484099,-1.2425581, False, inf, True, False
+The Fir Tree,2, True, True, False, False, The Fir Tree; 163; Iffley Road; Cold Harbour; Oxford; Oxfordshire; South East; England; OX4 1EJ; United Kingdom,51.74443455,-1.24001978878481, False, inf, True, False
+The James Street Tavern,1.9, True, False, False, True, James Street Tavern; 47-48; James Street; Cold Harbour; Oxford; Oxfordshire; South East; England; OX4 1EU; United Kingdom,51.7474273,-1.23734537419336, False, inf, True, False
+The Library,2, True, False, False, False, The Library; 182; Cowley Road; Oxford; Oxfordshire; South East; England; OX4 1UE; United Kingdom,51.7470254,-1.2349056, False, inf, True, False
+The Rusty Bicycle,2.5, True, False, False, False, The Rusty Bicycle; 28; Magdalen Road; Oxford; Oxfordshire; South East; England; OX4 1RB; United Kingdom,51.74293385,-1.23426479339971, False, inf, True, False
+The Magdalen Arms,2.5, True, False, False, False, 243 Iffley Rd; Oxford OX4 1SJ,51.7412131073981,-1.23714996301301, False, inf, True, False
+The Chester Arms,2.5, True, False, False, False, 19 Chester St; Oxford OX4 1SN,51.7416208644809,-1.24080809977684, False, inf, True, False
+The University Club,0.2, True, False, False, False, University Club; 11; Mansfield Road; Norham Manor; Oxford; Oxfordshire; South East; England; OX1 3SZ; United Kingdom,51.7571228,-1.25133594489384, False, inf, False, False
+The Up in Arms,1.4, True, False, False, False, 252-242 Marston Rd; Oxford,51.7594972,-1.2368538, False, inf, True, False
+The Seacourt Bridge,3.86, True, False, False, False, 78 West Way; Botley; Oxford; OX2 0JB; United Kingdom,51.7517451772043,-1.29883516853964, False, inf, True, False
+Keble College Bar,0.482, True, False, False, False, Keble College; Parks Road; Oxford; OX1 3PG; United Kingdom,51.758508,-1.257914, False, inf, True, True
+Balliol College Bar,1, True, False, False, False, Oxford OX1 3BJ,51.7542965103699,-1.2573554716341, False, inf, True, True
+Univ College Bar,1, True, False, False, False, High Street; Oxford,51.7527209222971,-1.2519212901712, False, inf, True, True
+New College Bar,0.482, True, False, False, False, New College; Holywell Street; OX1 3BN,51.7548805957094,-1.25062048829956, False, inf, True, True
+The Punter,1, True, False, False, False, 7 South St; Oxford OX2 0BE,51.7502615399644,-1.27284609209693, False, inf, True, False
+The Perch,1, True, False, False, False, Binsey; Oxford OX2 0NG,51.765005946629,-1.28785438531216, False, inf, True, False
+The Trout Inn,1, True, False, False, False, 195 Godstow Rd; Wolvercote; Oxford OX2 8PN,51.7801462479221,-1.29953624792141, False, inf, True, False
+Jacobs Inn,1, True, False, False, False, 130 Godstow Rd; Wolvercote; Oxford OX2 8PG,51.7837674241487,-1.29349295231638, False, inf, True, False
+The White Hart,1, True, False, False, False, 126 Godstow Rd; Wolvercote; Oxford OX2 8PQ,51.7837587739562,-1.29310320237986, False, inf, True, False
+The Plough,1, True, False, False, False, The Green; Upper; Wolvercote; Oxford OX2 8BD,51.7836845571823,-1.28259806893757, False, inf, True, False
+The Victoria Arms,1, True, False, False, False, Mill Ln; Marston; Oxford OX3 0QA,51.7768118811409,-1.24732899560725, False, inf, True, False
+The White Hart Headington,1, True, False, False, False, 12 St Andrew's Rd; Headington; Oxford OX3 9DL,51.764451407904,-1.21194674850583, False, inf, True, False
+The Black Boy,1, True, False, False, False, 91 Old High St; Headington; Oxford OX3 9HT,51.7643105670478,-1.21073407661599, False, inf, True, False
+The Britannia Inn,1, True, False, False, False, 1 Lime Walk; London Rd; Headington; Oxford OX3 7AA,51.7591756667203,-1.21427442092707, False, inf, True, False
+The Butcher's Arms,1, True, False, False, False, 5 Wilberforce St; Headington; Oxford OX3 7AN,51.7559193780812,-1.21109828190323, False, inf, True, False
+The Prince of Wales Horspath,1, True, False, False, False, Horspath Rd; Oxford OX4 2QW,51.7382194844057,-1.20172794790738, False, inf, True, False
+The Original Swan,1, True, False, False, False, Oxford Rd; Cowley OX4 2LF,51.7342985575001,-1.21206606493, False, inf, True, False
+The Cricketers Arms,1, True, False, False, False, 102 Temple Rd; Oxford OX4 2EZ,51.7356141709005,-1.21208741059933, False, inf, True, False
+The Marsh Harrier,1, True, False, False, False, 40 Marsh Rd; Oxford OX4 2HH,51.7385192468082,-1.21782480653267, False, inf, True, False
+The Jolly Postboys,1, True, False, False, False, 22 Florence Park Rd; Oxford OX4 3PH,51.7335892766666,-1.22531358875795, False, inf, True, False
+The Prince of Wales Iffley,1, True, False, False, False, 73 Church Way; Iffley; Oxford OX4 4EF,51.7301942155441,-1.23720628133477, False, inf, True, False
+The Isis Farmhouse,1, True, False, False, False, Haystacks Corner; The Towing Path; Iffley; Iffley Lock; Oxford OX4 4EL,51.7309860158233,-1.24118710654838, False, inf, True, False
+The Duke of Monmouth,1, True, False, False, False, 260 Abingdon Rd; Oxford OX1 4TA,51.7373626449672,-1.25184287642327, False, inf, True, False
+The White House by Tap Social,1, True, False, False, False, 38 Abingdon Rd; Oxford OX1 4PD,51.7437391344709,-1.25591361152332, False, inf, True, False
+Cherwell Boathouse,1, True, False, False, False, Bardwell Rd; Oxford OX2 6ST,51.7695233099745,-1.25372493084905, False,6.89, True, False
+The Vine Inn,1, True, False, False, False, 11 Abingdon Rd; Cumnor; Oxford OX2 9QN,51.7335532316095,-1.33164375508107, False, inf, True, False
+The Bear & Ragged Staff,1, True, False, False, False, 28 Appleton Rd; Cumnor; Oxford OX2 9QH,51.7332855678555,-1.33656887209679, False, inf, True, False
+The Masons Arms,1, True, False, False, False, 2 Quarry School Pl; Headington; Oxford OX3 8LH,51.7583042166622,-1.19733818032277, False, inf, True, False
+The Six Bells,1, True, False, False, False, 3 Beaumont Rd; Headington; Oxford OX3 8JN,51.7594442092423,-1.19585118068673, False, inf, True, False
+The Ampleforth Arms,1, True, False, False, False, 53 Collinwood Rd; Headington; Oxford OX3 8HH,51.7598494683287,-1.19033816927639, False, inf, True, False
+The Dewdrop,1, True, False, False, False, Dewdrop; Banbury Road; Summertown; Oxford,51.7775776954064,-1.26475653070583, False,4, True, False
+Lincoln College Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7531498308083,-1.25605598069451,FALSE,inf,TRUE,TRUE
+New College MCR Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7575867271149,-1.24771959139565,FALSE,inf,TRUE,TRUE
+Balliol College MCR Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7554396768663,-1.24825523875777,FALSE,inf,TRUE,TRUE
+Jesus College Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7533951150489,-1.25695950229356,FALSE,inf,TRUE,TRUE
+Brasenose College Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7528717415077,-1.25487927250839,FALSE,inf,TRUE,TRUE
+Queens College Bar,1,TRUE,FALSE,FALSE,FALSE,None,51.7532911946597,-1.25104281474853,FALSE,inf,TRUE,TRUE

@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script to decide which pub to go to.
-
-Created on 2021
+Script to decide which pub to go to in Oxford.
 
 @author: Matt Bailey
 """
@@ -22,19 +20,22 @@ import pandas as pd
 from scipy.spatial import KDTree
 
 from osm import read_osm
-from pub_data import PUBS, Pub
+from pub_data import Pub, import_pubs
 from pub_drawing import plot_highlighted_paths, plot_pub_map, plot_pub_voronoi
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-logger = logging.getLogger()
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+logger.setLevel(logging.INFO)
 
-PTCL_LOCATION = (-1.2535525, 51.7593620)
+PTCL_LOCATION = (-1.2534844873736306, 51.7590386380762)
+COWLEY_LOCATION = (-1.238619165541374, 51.7482684115883)
 PERSON_VETOS = defaultdict(set)
-PERSON_VETOS["Max"] = {
-    "The Lamb and Flag",
-}
-PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan"}
-# PERSON_VETOS["Tristan"] = {"The Kings Arms"}
+# PERSON_VETOS["Max"] = {
+#    "The Lamb and Flag",
+# }
+PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan", "The Wig and Pen"}
+PERSON_VETOS["Tristan"] = {"The Kings Arms"}
 
 Coordinate = Tuple[float, float]
 _closest_node_cache: Dict[Coordinate, int] = {}
@@ -124,10 +125,11 @@ def load_graph(filename: str) -> nx.Graph:
     filename
         The name of the file to read from.
     """
-    try:
+
+    if os.path.exists(filename + ".pkl"):
         nx_graph = nx.read_gpickle(filename + ".pkl")
-        logging.info("Loading graph from pickle")
-    except FileNotFoundError:
+        logger.info("Loading graph from pickle")
+    else:
         nx_graph = read_osm(filename)
         nx.write_gpickle(nx_graph, filename + ".pkl")
 
@@ -202,6 +204,7 @@ def populate_distances(
     pubs: List[Pub],
     pubgoers: Iterable[str],
     person_locations: Dict[str, Tuple[float, float]],
+    home_locations: Dict[str, Tuple[float, float]],
     graph: nx.Graph,
 ) -> List[Pub]:
     """
@@ -229,31 +232,34 @@ def populate_distances(
         distance = 0.0
         for pubgoer in pubgoers:
 
-            loc = person_locations[pubgoer]
-            if (pub.name, loc) in _distance_cache:
-                shortest_distance = _distance_cache[(pub.name, loc)]
-                distance += shortest_distance
-                logging.info(
-                    f"shortest path from {pub.name} to {pubgoer} is {shortest_distance}"
-                )
-                continue
+            for loc in (person_locations[pubgoer], home_locations[pubgoer]):
+                if (pub.name, loc) in _distance_cache:
+                    shortest_distance = _distance_cache[(pub.name, loc)]
+                    distance += shortest_distance
+                    logger.info(
+                        f"shortest path from {pub.name} to {pubgoer} is {shortest_distance}"
+                    )
+                else:
+                    # Fall back to finding the actual path
+                    source_node = find_closest_node(loc, positions)
+                    try:
+                        shortest_distance: float = nx.shortest_path_length(
+                            graph,
+                            source=source_node,
+                            target=closest_nodes[pub.name],
+                            weight="length",
+                        )
+                        _distance_cache[(pub.name, loc)] = shortest_distance
+                        distance += shortest_distance
+                        logger.info(
+                            f"Uncached shortest path from {pub.name} to {pubgoer} is {shortest_distance}"
+                        )
+                    except nx.NetworkXNoPath:
+                        logger.warning(
+                            f"Could not find a path between {pub.name} and {pubgoer}. Marking it as closed."
+                        )
+                        pub.is_open = False
 
-            source_node = find_closest_node(loc, positions)
-            try:
-                shortest_distance: float = nx.shortest_path_length(
-                    graph,
-                    source=source_node,
-                    target=closest_nodes[pub.name],
-                    weight="length",
-                )
-                _distance_cache[(pub.name, loc)] = shortest_distance
-                distance += shortest_distance
-                # print(
-                #    f"shortest path from {pub.name} to {pubgoer} is {shortest_distance}"
-                # )
-            except nx.NetworkXNoPath:
-                print(f"could not find a path between {pub.name} and {pubgoer}")
-                pub.is_open = False
         pub.distance = distance
     return pubs
 
@@ -299,38 +305,99 @@ def main():
         "--distance", default=1.0, type=float, help="Maximum average distance to travel"
     )
     parser.add_argument(
+        "--print", default=5, type=int, help="How many pubs to print in the table"
+    )
+    parser.add_argument(
         "--temperature",
         default=1.0,
         type=float,
         help="Monte Carlo temperature for deciding on which pub. Higher temperature means less optimal choices.",
     )
+
+    parser.add_argument(
+        "--datafile",
+        default="./oxford-pub-data.csv",
+        type=str,
+        help="Name of the file containing the pub data",
+    )
+
+    parser.add_argument(
+        "--colleges", default=False, type=bool, help="Should we include colleges?"
+    )
+
+    parser.add_argument(
+        "--mapfile",
+        default="oxford.osm",
+        type=str,
+        help="Name of the OpenStreetMap file",
+    )
+
+    def LoggingTypeVerifier(arg: str):
+        _logging_types = {"CRITICAL", "ERROR", "WARNING", "NOTSET", "INFO", "DEBUG"}
+        arg = str(arg).upper()
+        if arg in _logging_types:
+            return arg
+        raise argparse.ArgumentTypeError(f"{arg} is not a valid logging type.")
+
+    parser.add_argument(
+        "--logging",
+        default="NOTSET",
+        type=LoggingTypeVerifier,
+        help="Level of logging messages to show",
+    )
+
     args = parser.parse_args()
+    logger.setLevel(args.logging.upper())
 
     temperature = args.temperature
     pubgoers = args.pubgoers
 
     person_locations = defaultdict(lambda: PTCL_LOCATION)
+    home_locations = defaultdict(lambda: COWLEY_LOCATION)
 
     if os.path.exists("./locations.csv"):
         person_df = pd.read_csv("./locations.csv")
         for idx, row in person_df.iterrows():
             person_locations[row["name"]] = (row["lon"], row["lat"])
 
+    if os.path.exists("./home-locations.csv"):
+        home_df = pd.read_csv("./home-locations.csv")
+        for idx, row in home_df.iterrows():
+            home_locations[row["name"]] = (row["lon"], row["lat"])
+
     logger.info("Loading OpenStreetMap graph...")
-    nx_graph = load_graph("map.osm")
+    assert os.path.exists(
+        args.mapfile
+    ), f"{args.mapfile} is not a valid path to a map file"
+    assert (
+        os.path.splitext(args.mapfile)[1] == ".osm"
+    ), f"Must provide a mapfile ending in .osm, got {args.mapfile}"
+    nx_graph = load_graph(args.mapfile)
 
     positions = {
         node: np.array([nx_graph.nodes[node]["lon"], nx_graph.nodes[node]["lat"]])
         for node in nx_graph.nodes
     }
     nx.set_node_attributes(nx_graph, positions, name="pos")
-    pubs = [pub for pub in PUBS if pub.is_open]
-    logging.info("Calculating distances...")
-    pubs = populate_distances(pubs, pubgoers, person_locations, nx_graph)
 
-    pub_vetos = set(name for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer])
+    if args.colleges:
+        pubs = [pub for pub in import_pubs(args.datafile) if pub.is_open]
+    else:
+        pubs = [
+            pub
+            for pub in import_pubs(args.datafile)
+            if pub.is_open and not pub.is_college
+        ]
+    logger.info("Calculating distances...")
+    pubs = populate_distances(
+        pubs, pubgoers, person_locations, home_locations, nx_graph
+    )
 
-    logging.info("Satisfying constraints...")
+    pub_vetos = set(
+        name.lower().strip() for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer]
+    )
+    logger.info("Veto'd pubs are" + ",".join(pub_vetos))
+    logger.info("Satisfying constraints...")
     valid_pubs = find_satisfied_constraints(
         pubs,
         [
@@ -343,7 +410,7 @@ def main():
             ),
             ("has_pub_quiz", lambda has_pub_quiz: not has_pub_quiz),
             ("has_live_music", lambda has_live_music: not has_live_music),
-            ("name", lambda name: name not in pub_vetos),
+            ("name", lambda name: name.lower().strip() not in pub_vetos),
             ("has_funny_smell", lambda has_funny_smell: not has_funny_smell),
             ("is_college", lambda is_college: not is_college),
         ],
@@ -372,16 +439,24 @@ def main():
 
     weights = np.exp(-(distance_weights + price_weights) / temperature)
     weights = weights / np.sum(weights)
-    print("-------------------------------------⊤------⊤------⊤------⊣")
-    print("       Name                          | Dist.| Pint |Chance|")
-    print("-------------------------------------+------+------+------⊣")
-
     weight_order = np.argsort(-weights)
-    for pub_id in weight_order[: min(5, len(valid_pubs))]:
-        print(
-            f"{valid_pubs[pub_id].name:36} | {valid_pubs[pub_id].distance:4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
+    max_name_len = (
+        max(
+            len(valid_pubs[pub_id].name)
+            for pub_id in weight_order[: min(args.print, len(valid_pubs))]
         )
-    print("-------------------------------------⊥------⊥------⊥------⊣")
+        + 1
+    )
+
+    print("-" * (max_name_len) + "-⊤------⊤------⊤------⊣")
+    print("Name" + " " * (max_name_len - 4) + " | Dist.| Pint |Chance|")
+    print("-" * (max_name_len) + "-+------+------+------⊣")
+
+    for pub_id in weight_order[: min(args.print, len(valid_pubs))]:
+        print(
+            f"{valid_pubs[pub_id].name:{max_name_len}} | {valid_pubs[pub_id].distance/len(pubgoers):4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
+        )
+    print("-" * (max_name_len) + "-⊥------⊥------⊥------⊣")
 
     rng = np.random.default_rng()
     random_idx = rng.choice(list(range(len(valid_pubs))), p=weights)
@@ -390,7 +465,7 @@ def main():
         f"I have randomly chosen {random_pub.name} with probability {weights[random_idx]*100:.1f}%"
     )
 
-    logging.info("Plotting shortest paths...")
+    logger.info("Plotting shortest paths...")
     paths_highlight = []
     for pubgoer in pubgoers:
         person_node = find_closest_node(person_locations[pubgoer], positions)
@@ -398,17 +473,30 @@ def main():
         choice_path = nx.shortest_path(
             nx_graph, source=person_node, target=pub_node, weight="length"
         )
+
+        home_node = find_closest_node(home_locations[pubgoer], positions)
+        home_path = nx.shortest_path(
+            nx_graph, source=home_node, target=pub_node, weight="length"
+        )
+
         paths_highlight.append(
             [
                 (choice_path[node], choice_path[node + 1])
                 for node in range(len(choice_path) - 1)
             ]
         )
-    logging.info("Visualsing pub map...")
+
+        paths_highlight.append(
+            [
+                (home_path[node + 1], home_path[node])
+                for node in range(len(home_path) - 1)
+            ]
+        )
+    logger.info("Visualising pub map...")
     _, ax = plt.subplots()
     ax = plot_pub_map(nx_graph, pubs, ax=ax)
     ax = plot_pub_voronoi(pubs, ax=ax, with_labels=True)
-    ax = plot_highlighted_paths(nx_graph, paths_highlight, ax=ax)
+    ax = plot_highlighted_paths(nx_graph, paths_highlight, ax=ax, draw_arrows=True)
     plt.show()
 
 

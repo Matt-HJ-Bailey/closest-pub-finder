@@ -1,4 +1,5 @@
 import copy
+
 # Specific modules
 import xml.sax  # parse osm file
 
