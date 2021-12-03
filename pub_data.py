@@ -630,7 +630,7 @@ PUBS = [
         1.0,
         address="Dewdrop, Banbury Road, Summertown, Oxford",
         coordinates=(51.77757769540642, -1.2647565307058308),
-        cheapest_pint=4.0,
+        cheapest_pint=4.15,
     ),
 ]
 
