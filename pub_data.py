@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Script to load pub data
+
+@author: Matt Bailey
+"""
 from typing import List
 
 import numpy as np
@@ -59,6 +66,21 @@ class Pub:
         Get a string representation of this pub
         """
         return ", ".join(str(value) for attr, value in self.__dict__.items())
+
+    def to_csv_str(self) -> str:
+        """
+        Get this pub as a single string suitable for a .csv
+        """
+        return repr(self) + "\n"
+
+    @property
+    def coordinates(self) -> np.ndarray:
+        """
+        Get the coordinates of this as a lon, lat pair.
+
+        Used for distance calculations later.
+        """
+        return np.array([self.lon, self.lat], dtype=float)
 
     def to_csv_str(self) -> str:
         """

@@ -10,6 +10,9 @@ import argparse
 import collections
 import itertools
 import logging
+import functools
+
+from typing import Tuple, List
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -30,11 +33,17 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
-
 PTCL_LOCATION = (-1.2534844873736306, 51.7590386380762)
 
 
-def find_shortest_crawl_path(nx_graph, pubs):
+@functools.cache
+def get_shortest_path_length(graph, node_i, node_j) -> float:
+    return nx.shortest_path_length(
+        graph, source=node_i, target=node_j, weight="length",
+    )
+
+
+def find_shortest_crawl_path(nx_graph, pubs) -> Tuple[List, List, float]:
     closest_nodes = find_all_closest_nodes(
         pubs, nx.get_node_attributes(nx_graph, "pos")
     )
@@ -47,12 +56,8 @@ def find_shortest_crawl_path(nx_graph, pubs):
     # Instead, do some pre-processing ourselves.
     ip_graph = nx.Graph()
     for pub_i, pub_j in itertools.combinations(pubs, 2):
-
-        shortest_distance: float = nx.shortest_path_length(
-            nx_graph,
-            source=closest_nodes[pub_i.name],
-            target=closest_nodes[pub_j.name],
-            weight="length",
+        shortest_distance = get_shortest_path_length(
+            nx_graph, closest_nodes[pub_i.name], closest_nodes[pub_j.name]
         )
         logging.info(
             f"Shortest distance from {pub_i} to {pub_j} is {shortest_distance}"
@@ -63,11 +68,8 @@ def find_shortest_crawl_path(nx_graph, pubs):
         PTCL_LOCATION, nx.get_node_attributes(nx_graph, "pos")
     )
     for pub in pubs:
-        dist_to_ptcl = nx.shortest_path_length(
-            nx_graph,
-            source=closest_nodes[pub.name],
-            target=closest_nodes["PTCL"],
-            weight="length",
+        dist_to_ptcl = get_shortest_path_length(
+            nx_graph, closest_nodes[pub.name], closest_nodes["PTCL"]
         )
         ip_graph.add_edge(pub.name, "PTCL", length=dist_to_ptcl)
     path = nx.approximation.traveling_salesman_problem(
@@ -85,7 +87,14 @@ def find_shortest_crawl_path(nx_graph, pubs):
     name_path = collections.deque(path)
     ptcl_index = name_path.index("PTCL")
     name_path.rotate(-ptcl_index)
-    return total_path, name_path
+    flattened_nodes = [item for sublist in total_path for item in sublist]
+    edge_lengths = nx.get_edge_attributes(nx_graph, "length")
+    edge_list = [
+        (flattened_nodes[i], flattened_nodes[i + 1])
+        for i in range(len(flattened_nodes) - 1)
+    ]
+    total_length = sum(edge_lengths.get(edge, 0.0) for edge in edge_list)
+    return total_path, name_path, total_length
 
 
 def main():
@@ -98,14 +107,12 @@ def main():
         type=float,
         help="Monte Carlo temperature for deciding on which pub. Higher temperature means less optimal choices.",
     )
-
     parser.add_argument(
         "--datafile",
         default="./oxford-pub-data.csv",
         type=str,
         help="Name of the file containing the pub data",
     )
-
     parser.add_argument(
         "--mapfile",
         default="oxford.osm",
@@ -170,17 +177,20 @@ def main():
         + ",".join(pub.name for pub in valid_crawl_pubs)
     )
 
-    shortest_path, name_path = find_shortest_crawl_path(nx_graph, valid_crawl_pubs)
+    shortest_path, name_path, total_length = find_shortest_crawl_path(
+        nx_graph, valid_crawl_pubs
+    )
     paths_highlight = [
         [(sublist[node], sublist[node + 1]) for node in range(len(sublist) - 1)]
         for sublist in shortest_path
     ]
+
     _, ax = plt.subplots()
     ax = plot_pub_map(nx_graph, valid_crawl_pubs, with_labels=True, ax=ax)
     # ax = plot_pub_voronoi(pubs, ax=ax, with_labels=True)
     ax = plot_highlighted_paths(nx_graph, paths_highlight, ax=ax, styles="dashed")
     plt.show()
-    print("The shortest path is", name_path)
+    print("The shortest path is", name_path, "with a length of", total_length)
 
 
 if __name__ == "__main__":

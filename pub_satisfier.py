@@ -31,9 +31,10 @@ logger.setLevel(logging.INFO)
 PTCL_LOCATION = (-1.2534844873736306, 51.7590386380762)
 COWLEY_LOCATION = (-1.238619165541374, 51.7482684115883)
 PERSON_VETOS = defaultdict(set)
-# PERSON_VETOS["Max"] = {
-#    "The Lamb and Flag",
-# }
+PERSON_VETOS["Max"] = {
+    "The Lamb and Flag",
+}
+
 PERSON_VETOS["Matt"] = {"The Half Moon", "The Black Swan", "The Wig and Pen"}
 PERSON_VETOS["Tristan"] = {"The Kings Arms"}
 
@@ -259,7 +260,6 @@ def populate_distances(
                             f"Could not find a path between {pub.name} and {pubgoer}. Marking it as closed."
                         )
                         pub.is_open = False
-
         pub.distance = distance
     return pubs
 
@@ -313,7 +313,6 @@ def main():
         type=float,
         help="Monte Carlo temperature for deciding on which pub. Higher temperature means less optimal choices.",
     )
-
     parser.add_argument(
         "--datafile",
         default="./oxford-pub-data.csv",
@@ -358,7 +357,7 @@ def main():
     if os.path.exists("./locations.csv"):
         person_df = pd.read_csv("./locations.csv")
         for idx, row in person_df.iterrows():
-            person_locations[row["name"]] = (row["lon"], row["lat"])
+            person_locations[row["name"]] = (row["lat"], row["lon"])
 
     if os.path.exists("./home-locations.csv"):
         home_df = pd.read_csv("./home-locations.csv")
@@ -372,6 +371,8 @@ def main():
     assert (
         os.path.splitext(args.mapfile)[1] == ".osm"
     ), f"Must provide a mapfile ending in .osm, got {args.mapfile}"
+
+    logger.info("Loading OpenStreetMap graph...")
     nx_graph = load_graph(args.mapfile)
 
     positions = {
@@ -396,6 +397,7 @@ def main():
     pub_vetos = set(
         name.lower().strip() for pubgoer in pubgoers for name in PERSON_VETOS[pubgoer]
     )
+
     logger.info("Veto'd pubs are" + ",".join(pub_vetos))
     logger.info("Satisfying constraints...")
     valid_pubs = find_satisfied_constraints(
@@ -440,6 +442,7 @@ def main():
     weights = np.exp(-(distance_weights + price_weights) / temperature)
     weights = weights / np.sum(weights)
     weight_order = np.argsort(-weights)
+
     max_name_len = (
         max(
             len(valid_pubs[pub_id].name)
@@ -473,7 +476,6 @@ def main():
         choice_path = nx.shortest_path(
             nx_graph, source=person_node, target=pub_node, weight="length"
         )
-
         home_node = find_closest_node(home_locations[pubgoer], positions)
         home_path = nx.shortest_path(
             nx_graph, source=home_node, target=pub_node, weight="length"
