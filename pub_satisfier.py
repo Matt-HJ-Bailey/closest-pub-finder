@@ -325,6 +325,10 @@ def main():
     )
 
     parser.add_argument(
+        "--lastvisit", default=False, type=bool, help="Should we weight the last visit?"
+    )
+
+    parser.add_argument(
         "--mapfile",
         default="oxford.osm",
         type=str,
@@ -374,6 +378,11 @@ def main():
 
     logger.info("Loading OpenStreetMap graph...")
     nx_graph = load_graph(args.mapfile)
+
+    for pubgoer in pubgoers:
+        print(
+            f"{pubgoer} is coming from {person_locations[pubgoer]} and going to {home_locations[pubgoer]}"
+        )
 
     positions = {
         node: np.array([nx_graph.nodes[node]["lon"], nx_graph.nodes[node]["lat"]])
@@ -439,7 +448,18 @@ def main():
 
     distance_weights = argsort_preserve_ties([pub.distance for pub in valid_pubs])
 
-    weights = np.exp(-(distance_weights + price_weights) / temperature)
+    for pub in valid_pubs:
+        print(pub.seconds_since_visit)
+
+    lastvisit_weights = np.zeros_like(distance_weights)
+    if args.lastvisit:
+        lastvisit_weights = argsort_preserve_ties(
+            [pub.seconds_since_visit for pub in valid_pubs]
+        )
+
+    weights = np.exp(
+        -(distance_weights + price_weights + lastvisit_weights) / temperature
+    )
     weights = weights / np.sum(weights)
     weight_order = np.argsort(-weights)
 
@@ -451,15 +471,16 @@ def main():
         + 1
     )
 
-    print("-" * (max_name_len) + "-⊤------⊤------⊤------⊣")
-    print("Name" + " " * (max_name_len - 4) + " | Dist.| Pint |Chance|")
-    print("-" * (max_name_len) + "-+------+------+------⊣")
+    print("-" * (max_name_len) + "-⊤------⊤------⊤-----⊤----⊣")
+    print("Name" + " " * (max_name_len - 4) + " | Dist.| Pint |Days |Chance|")
+    print("-" * (max_name_len) + "-+------+------+-----+----⊣")
 
     for pub_id in weight_order[: min(args.print, len(valid_pubs))]:
+        days = valid_pubs[pub_id].seconds_since_visit / (24 * 60 * 60)
         print(
-            f"{valid_pubs[pub_id].name:{max_name_len}} | {valid_pubs[pub_id].distance/len(pubgoers):4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {weights[pub_id]*100:4.1f}%|"
+            f"{valid_pubs[pub_id].name:{max_name_len}} | {valid_pubs[pub_id].distance/len(pubgoers):4.1f} | {valid_pubs[pub_id].cheapest_pint:4.2f} | {days:.0f} | {weights[pub_id]*100:4.1f}%|"
         )
-    print("-" * (max_name_len) + "-⊥------⊥------⊥------⊣")
+    print("-" * (max_name_len) + "-⊥------⊥------⊥-----⊥----⊣")
 
     rng = np.random.default_rng()
     random_idx = rng.choice(list(range(len(valid_pubs))), p=weights)

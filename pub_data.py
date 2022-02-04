@@ -5,8 +5,9 @@ Script to load pub data
 
 @author: Matt Bailey
 """
-from typing import List
+from typing import List, Tuple
 
+import datetime
 import numpy as np
 import pandas as pd
 
@@ -19,15 +20,16 @@ class Pub:
         has_beer: bool = True,
         has_pub_quiz: bool = False,
         is_spoons: bool = False,
-        has_live_music=False,
+        has_live_music: bool = False,
         address: str = None,
-        coordinates=None,
-        lat=None,
-        lon=None,
-        has_funny_smell=False,
+        coordinates: Tuple[float, float] = None,
+        lat: float = None,
+        lon: float = None,
+        has_funny_smell: bool = False,
         cheapest_pint: float = float("inf"),
-        is_open=True,
-        is_college=False,
+        is_open: bool = True,
+        is_college: bool = False,
+        last_visited: datetime.datetime = datetime.datetime(year=2020, month=1, day=1),
         **kwargs,
     ):
         """
@@ -58,6 +60,12 @@ class Pub:
         self.cheapest_pint = cheapest_pint
         self.is_open = is_open
         self.is_college = is_college
+        self.seconds_since_visit = (
+            datetime.datetime.now() - last_visited
+        ).total_seconds()
+        if np.isnan(self.seconds_since_visit):
+            self.seconds_since_visit = np.inf
+
         for key, val in kwargs.items():
             self.__setattr__(key, val)
 
@@ -127,7 +135,7 @@ def import_pubs(filename: str) -> List[Pub]:
     -------
         a list of pubs that have been read from the file
     """
-    df = pd.read_csv(filename, skipinitialspace=True)
+    df = pd.read_csv(filename, skipinitialspace=True, parse_dates=["last_visited"])
     pubs = [pub_from_dict(row) for idx, row in df.iterrows()]
     return pubs
 
